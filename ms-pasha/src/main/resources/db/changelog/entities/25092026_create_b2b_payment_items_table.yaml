@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 25092026_create_b2b_payment_items_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: b2b_payment_items
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: type, type: VARCHAR(50) }
+              - column: { name: amount, type: "DECIMAL(15,2)" }
+              - column: { name: commission_account, type: VARCHAR(255) }
+              - column: { name: description, type: VARCHAR(1000) }
+              - column: { name: file_required, type: BOOLEAN }
+              - column: { name: urgent, type: BOOLEAN }
+              - column: { name: reference_number, type: VARCHAR(255) }
+
+              - column: { name: payer_account_number, type: VARCHAR(255) }
+
+              - column: { name: payee_account_number, type: VARCHAR(255) }
+              - column: { name: payee_name, type: VARCHAR(255) }
+              - column: { name: payee_tin, type: VARCHAR(255) }
+              - column: { name: payee_type, type: VARCHAR(50) }
+              - column: { name: payee_email, type: VARCHAR(255) }
+              - column: { name: payee_address, type: VARCHAR(500) }
+              - column: { name: payee_additional_info, type: VARCHAR(500) }
+              - column: { name: payee_bank_code, type: VARCHAR(50) }
+              - column: { name: payee_bank_name, type: VARCHAR(255) }
+
+              - column: { name: bulk_payment_id, type: BIGINT, constraints: { nullable: false } }
+
+        - createIndex:
+            indexName: idx_b2b_payment_items_bulk_payment_id
+            tableName: b2b_payment_items
+            columns:
+              - column: { name: bulk_payment_id }

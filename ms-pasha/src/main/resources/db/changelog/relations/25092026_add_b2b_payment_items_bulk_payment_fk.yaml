@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 25092026_add_b2b_payment_items_bulk_payment_fk
+      author: Subhan-Valili
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: b2b_payment_items
+            baseColumnNames: bulk_payment_id
+            constraintName: fk_b2b_payment_items_bulk_payment
+            referencedTableName: b2b_bulk_payments
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT

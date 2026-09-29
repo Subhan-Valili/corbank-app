@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Analitika</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+<link rel="stylesheet" href="css/analitika.css?v=1">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+    <!-- topbar injected by JS -->
+    <main class="an-page">
+      <div class="an-head">
+        <div>
+          <h1>Şirkət analitikası</h1>
+          <p id="anLead">Bütün hesabların AZN ekvivalentində icmalı</p>
+        </div>
+      </div>
+
+      <section class="card an-card an-filters-card">
+        <div class="an-filters">
+          <div class="an-field">
+            <label for="startDate">Başlanğıc tarixi</label>
+            <input class="an-input" id="startDate" type="date">
+          </div>
+          <div class="an-field">
+            <label for="endDate">Son tarix</label>
+            <input class="an-input" id="endDate" type="date">
+          </div>
+          <div class="an-fx-note" id="fxNote"></div>
+        </div>
+      </section>
+
+      <div class="an-summary-grid">
+        <div class="card an-summary-card">
+          <div class="an-summary-lbl">Ümumi qalıq · AZN ekvivalenti</div>
+          <div class="an-summary-val" id="sumBalance">—</div>
+        </div>
+        <div class="card an-summary-card">
+          <div class="an-summary-lbl">Dövr üzrə mədaxil · AZN ekvivalenti</div>
+          <div class="an-summary-val income" id="sumIncome">—</div>
+        </div>
+        <div class="card an-summary-card">
+          <div class="an-summary-lbl">Dövr üzrə məxaric · AZN ekvivalenti</div>
+          <div class="an-summary-val expense" id="sumExpense">—</div>
+        </div>
+      </div>
+
+      <section class="card an-card an-chart-card">
+        <h2>Mədaxil və məxaric dinamikası</h2>
+        <p class="an-chart-sub">Dövrün əvvəlindən yığılan məbləğ · AZN</p>
+        <div class="an-chart-legend" id="chartLegend"></div>
+        <div class="an-chart-wrap" id="chartWrap"></div>
+        <div class="an-netflow">
+          <span>Xalis pul axını</span>
+          <span id="netFlow">—</span>
+        </div>
+      </section>
+
+      <div class="an-split-row">
+        <section class="card an-card an-donut-card">
+          <h2>Gəlirlərin bölgüsü</h2>
+          <div class="an-donut-body" id="incomeDonut"></div>
+        </section>
+        <section class="card an-card an-donut-card">
+          <h2>Xərclərin bölgüsü</h2>
+          <div class="an-donut-body" id="expenseDonut"></div>
+        </section>
+      </div>
+
+      <div class="an-split-row">
+        <section class="card an-card an-cp-card">
+          <h2>Ən çox vəsait daxil olan kontragentlər</h2>
+          <div id="cpIn"></div>
+        </section>
+        <section class="card an-card an-cp-card">
+          <h2>Ən çox köçürmə edilən kontragentlər</h2>
+          <div id="cpOut"></div>
+        </section>
+      </div>
+
+      <div class="an-error" id="anError" style="display:none;"></div>
+      <div class="an-demo-note">Demo məlumatlar</div>
+    </main>
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400000"></script>
+<script src="js/common.js?v=1791400000"></script>
+<script src="js/analitika.js?v=1791400000"></script>
+</body>
+</html>

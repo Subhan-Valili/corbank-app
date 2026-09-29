@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 25092026_create_b2b_bulk_payments_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: b2b_bulk_payments
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: bulk_id, type: BIGINT }
+              - column: { name: bulk_description, type: VARCHAR(1000) }
+              - column: { name: record_count, type: INT }
+              - column: { name: status, type: VARCHAR(50) }
+
+        - createIndex:
+            indexName: idx_b2b_bulk_id
+            tableName: b2b_bulk_payments
+            columns:
+              - column: { name: bulk_id }

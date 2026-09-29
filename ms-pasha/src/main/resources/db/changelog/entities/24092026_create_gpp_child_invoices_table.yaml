@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 24092026_create_gpp_child_invoices_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: gpp_child_invoices
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: external_child_invoice_id, type: VARCHAR(255) }
+              - column: { name: invoice_code, type: VARCHAR(255) }
+              - column: { name: receipt_number, type: VARCHAR(255) }
+              - column: { name: fee_calculation_method, type: VARCHAR(50) }
+              - column: { name: amount, type: "DECIMAL(15,2)" }
+              - column: { name: commission_amount, type: "DECIMAL(15,2)" }
+              - column: { name: service_code, type: INT }
+              - column: { name: service_description, type: VARCHAR(255) }
+              - column: { name: payment_receiver_code, type: INT }
+              - column: { name: payment_receiver_description, type: VARCHAR(255) }
+              - column: { name: invoice_id, type: BIGINT, constraints: { nullable: false } }
+
+        - createIndex:
+            indexName: idx_gpp_child_invoice_invoice_id
+            tableName: gpp_child_invoices
+            columns:
+              - column: { name: invoice_id }

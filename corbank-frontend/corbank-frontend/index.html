@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Əsas səhifə</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+<link rel="stylesheet" href="css/dashboard.css?v=2">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+    <!-- topbar injected by JS -->
+    <main class="db-page">
+
+      <div class="db-head">
+        <div>
+          <h1>Biznesinizə ümumi baxış</h1>
+          <p>Uğurlu biznes daha parlaq gələcək deməkdir.</p>
+        </div>
+        <div class="db-today" id="todayLabel">Bugün, —</div>
+      </div>
+
+      <!-- Hesablarım -->
+      <section class="db-panel">
+        <div class="db-panel-head">
+          <h2>Hesablarım</h2>
+          <a class="db-link" href="hesablar.html">Bütün hesabları gör <span class="db-link-chev" data-chev></span></a>
+        </div>
+        <div class="db-accounts" id="accountsGrid"></div>
+      </section>
+
+      <div class="db-columns">
+        <div class="db-col">
+          <!-- Digər hesablar və layihələr -->
+          <section class="db-panel">
+            <div class="db-panel-head">
+              <h2>Digər hesablar və layihələr</h2>
+            </div>
+            <div class="db-projects" id="projectsGrid"></div>
+          </section>
+
+          <!-- Son əməliyyatlar -->
+          <section class="db-panel">
+            <div class="db-panel-head">
+              <h2>Son əməliyyatlar</h2>
+              <a class="db-link" href="muhasibatliq.html">Bütün əməliyyatları gör <span class="db-link-chev" data-chev></span></a>
+            </div>
+            <div class="db-table-wrap">
+              <table class="db-table">
+                <thead>
+                  <tr><th>Tarix</th><th>Təsvir</th><th>Məbləğ</th><th>Status</th></tr>
+                </thead>
+                <tbody id="opsBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="db-col">
+          <!-- Digər banklar -->
+          <section class="db-panel">
+            <div class="db-panel-head">
+              <h2>Digər banklar</h2>
+              <a class="db-link" id="banksLink" href="#">Bütün bankları gör <span class="db-link-chev" data-chev></span></a>
+            </div>
+            <div class="db-banks" id="banksList"></div>
+          </section>
+
+          <!-- Valyuta məzənnələri -->
+          <section class="db-panel">
+            <div class="db-panel-head">
+              <h2>Valyuta məzənnələri</h2>
+              <a class="db-link" id="fxLink" href="#">Bütün məzənnələri gör <span class="db-link-chev" data-chev></span></a>
+            </div>
+            <div class="db-fx-head"><span>Valyuta</span><span>Alış</span><span>Satış</span></div>
+            <div id="fxList"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Sifarişlər -->
+      <section class="db-panel db-orders-panel">
+        <div class="db-panel-head">
+          <h2>Sifarişlər</h2>
+        </div>
+        <div class="db-orders" id="ordersGrid"></div>
+      </section>
+
+      <div class="db-demo-note">Demo məlumatlar</div>
+    </main>
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400000"></script>
+<script src="js/common.js?v=1791400000"></script>
+<script src="js/orders.js?v=1791400000"></script>
+<script src="js/dashboard.js?v=1791400000"></script>
+</body>
+</html>

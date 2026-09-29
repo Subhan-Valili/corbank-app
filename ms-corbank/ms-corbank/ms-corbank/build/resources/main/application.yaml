@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: ms-corbank
+
+server:
+  port: 8082
+
+ms-pasha:
+  base-url: http://localhost:9090
+
+# Mənim ABB Bank inteqrasiya mikroservisim (abb-bank-service layihəsi). Onun öz Postgres-i
+# var (əməliyyat tarixçəsi) və ABB-nin real "corporate-account-info" / "account/statement"
+# endpoint-lərinə gedir — bax abb-bank-service/README.md. ms-pasha ilə eyni port konflikti
+# olmasın deyə 8083-də saxlanılıb (8081 artıq ms-pasha-nındır, 8082 — bu ms-corbank-ın özü).
+ms-abb:
+  base-url: ${MS_ABB_BASE_URL:http://localhost:8083}
+
+# Frontend demo tək-müştəri rejimi üçün: PashaAccountFeignClient.findAllAccountsByCustomerNo
+# bu customerNo ilə çağırılır. ms-pasha-bank-ın insert-data-account.sql seed-inə əsasən
+# CUST-998877 3 valyutalı (AZN/USD/EUR) hesaba malikdir. Real mühitdə bunu autentifikasiya
+# olunmuş istifadəçidən götürmək lazımdır. Alternativ: CUST-112233 (korporativ, 2 hesab).
+corbank:
+  customer-no: ${CORBANK_CUSTOMER_NO:CUST-998877}

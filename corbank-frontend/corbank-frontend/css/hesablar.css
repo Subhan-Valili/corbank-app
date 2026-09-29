@@ -1,0 +1,29 @@
+/* =====================================================================
+   Bütün hesablar (hesablar.html). style.css, shell.css və dashboard.css-dən SONRA yüklənir.
+   ===================================================================== */
+.hs-order-btn { padding: 11px 18px; border-radius: 10px; }
+
+.hs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.hs-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 20px 22px 22px;
+}
+.hs-flag { margin-bottom: 14px; }
+.hs-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.hs-balance { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.hs-iban { color: var(--muted); font-size: 12.5px; margin-bottom: 16px; word-break: break-all; }
+.hs-go { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; }
+.hs-go-chev { display: inline-flex; }
+
+body.hide-amounts .hs-balance { filter: blur(6px); user-select: none; transition: filter .15s ease; }
+body.hide-amounts .hs-balance:hover { filter: none; }
+
+@media (max-width: 1000px) { .hs-grid { grid-template-columns: 1fr; } }

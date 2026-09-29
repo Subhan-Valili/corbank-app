@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Mühasibatlıq</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+<link rel="stylesheet" href="css/muhasibatliq.css?v=2">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+    <!-- topbar injected by JS -->
+    <main class="mh-page">
+      <div class="mh-head">
+        <div>
+          <h1>Mühasibatlıq</h1>
+          <p>Bütün hesabların əməliyyatları və müraciətlər</p>
+        </div>
+        <button class="mh-csv-btn" id="csvBtn" type="button"><span id="iconCsv"></span> CSV yüklə</button>
+      </div>
+
+      <div class="mh-tools" id="toolsGrid"></div>
+
+      <section class="card mh-card" id="opsCard">
+        <h2>Şirkətin əməliyyatları</h2>
+
+        <div class="mh-filters">
+          <div class="mh-field mh-field--search">
+            <label for="searchInput">Axtarış</label>
+            <input class="mh-input" id="searchInput" type="text" placeholder="Qarşı tərəf və ya təyinat" autocomplete="off">
+          </div>
+          <div class="mh-field mh-field--select">
+            <label for="accountSelect">Hesab</label>
+            <select class="mh-select" id="accountSelect">
+              <option value="all">Bütün hesablar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mh-table-wrap">
+          <table class="mh-table">
+            <thead>
+              <tr><th>Tarix</th><th>Qarşı tərəf / Təyinat</th><th>Məbləğ</th><th>Status</th></tr>
+            </thead>
+            <tbody id="opsBody"></tbody>
+          </table>
+        </div>
+        <div class="mh-empty" id="opsEmpty" style="display:none;">Bu filtrlərə uyğun əməliyyat tapılmadı.</div>
+        <div class="mh-error" id="opsError" style="display:none;"></div>
+
+        <div class="mh-pager">
+          <span class="mh-count" id="opsCount">0 əməliyyat</span>
+          <div class="mh-pager-controls">
+            <button class="mh-pager-btn" id="prevBtn" type="button">Əvvəlki</button>
+            <span class="mh-pager-info" id="pageInfo">1 / 1</span>
+            <button class="mh-pager-btn" id="nextBtn" type="button">Növbəti</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card mh-card mh-requests">
+        <h2>Müraciətlərim</h2>
+        <div class="mh-empty" id="requestsEmpty">Hələ müraciət yoxdur. Əsas səhifədə “Sifarişlər” bölməsindən müraciət yarada bilərsiniz.</div>
+      </section>
+
+      <div class="mh-demo-note">Demo məlumatlar</div>
+    </main>
+
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400000"></script>
+<script src="js/common.js?v=1791400000"></script>
+<script src="js/muhasibatliq.js?v=1791400000"></script>
+</body>
+</html>

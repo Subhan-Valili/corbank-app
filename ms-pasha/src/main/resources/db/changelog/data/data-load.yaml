@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: load-test-data
+      author: Subhan-Valili
+      context: dev
+      changes:
+        - sqlFile:
+            path: db/changelog/data/insert-data-account.sql
+            relativeToChangelogFile: false
+        - sqlFile:
+            path: db/changelog/data/insert-data-operation.sql
+            relativeToChangelogFile: false
+        - sqlFile:
+            path: db/changelog/data/insert-data-gpp.sql
+            relativeToChangelogFile: false
+        - sqlFile:
+            path: db/changelog/data/insert-data-b2b.sql
+            relativeToChangelogFile: false
+            splitStatements: false

@@ -1,0 +1,84 @@
+/* =====================================================================
+   Tariflər səhifəsi (tariflar.html) — ayrıca stil faylı.
+   style.css-dən SONRA yüklənir; onun dəyişənlərindən (--accent, --border,
+   --muted və s.) və ümumi siniflərindən (.card) istifadə edir.
+   Bütün yeni siniflər "tf-" ilə başlayır ki, digər səhifələrə təsir etməsin.
+   ===================================================================== */
+
+.tf-page {
+  flex: 1;
+  padding: 24px 28px 36px;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.tf-head { margin-bottom: 22px; }
+.tf-head h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--text);
+}
+.tf-head p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.tf-card {
+  padding: 22px 24px;
+  border-radius: 16px;
+}
+.tf-card h2 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tf-table-wrap { overflow-x: auto; }
+
+.tf-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.tf-table thead th {
+  background: #f2f5fb;
+  padding: 13px 14px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tf-table thead th:first-child { border-radius: 10px 0 0 10px; }
+.tf-table thead th:last-child  { border-radius: 0 10px 10px 0; }
+
+.tf-table th:nth-child(1) { width: 40%; }
+.tf-table th:nth-child(2) { width: 20%; }
+.tf-table th:nth-child(3) { width: 40%; }
+
+.tf-table tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  vertical-align: middle;
+}
+.tf-table tbody tr:last-child td { border-bottom: none; }
+.tf-table .tf-service { color: var(--accent); font-weight: 500; }
+.tf-table .tf-price { font-weight: 500; }
+.tf-table .tf-note { color: var(--text); }
+
+.tf-demo-note {
+  margin-top: 14px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .tf-page { padding: 18px 16px 28px; }
+  .tf-card { padding: 18px 16px; }
+}

@@ -1,0 +1,203 @@
+/* =====================================================================
+   Ortaq qabıq (shell): sidebar loqosu/rəngləri, yuxarı panel (topbar),
+   bayraq və bank loqoları. style.css-dən SONRA yüklənir.
+   ===================================================================== */
+
+/* ---------- Sidebar: loqo + menyu rəngləri ---------- */
+.brand { gap: 10px; padding: 4px 6px 26px; }
+.brand-logo { width: 46px; height: 46px; flex-shrink: 0; display: block; }
+.brand-text .name { font-size: 23px; line-height: 1.1; font-weight: 700; }
+.brand-text .sub { font-size: 14px; margin-top: 2px; }
+
+.nav-item { color: var(--text); }   /* aktiv element style.css-də --accent qalır */
+
+/* ---------- Sağ tərəf: topbar + məzmun ---------- */
+.shell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 68px;
+  padding: 0 32px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.topbar-company {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.topbar-company > svg { color: var(--accent); flex-shrink: 0; }
+.topbar-company .topbar-chev { color: var(--muted); margin-left: 6px; display: flex; }
+
+.topbar-bell {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.topbar-bell:hover { background: #f4f7fd; }
+.topbar-bell-dot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 1.5px solid #fff;
+}
+
+.topbar-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--text);
+}
+.topbar-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Bayraq və bank loqoları (img/ qovluğundakı SVG-lər) ---------- */
+.flag-img,
+.bank-img { display: block; flex-shrink: 0; }
+.flag-img { border-radius: 50%; object-fit: cover; }
+.bank-img { object-fit: contain; }
+.flag-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .topbar { padding: 0 16px; gap: 10px; }
+}
+
+/* ---------- Şirkət seçimi (dropdown) ---------- */
+.topbar-company-wrap { position: relative; }
+.topbar-company { cursor: pointer; }
+.topbar-company:hover { background: #f8faff; }
+.company-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(22, 33, 62, .14);
+  padding: 6px;
+  z-index: 900;
+}
+.company-menu[hidden] { display: none; }
+.company-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+}
+.company-item:hover { background: #f4f7fd; }
+.company-item.selected { color: var(--accent); }
+.topbar-user, .topbar-bell { cursor: pointer; }
+
+/* ---------- Modal: video dizaynına uyğun (böyük başlıq, alt başlıq, geniş pəncərə) ---------- */
+.modal-box { max-width: 680px; }
+.modal-head { align-items: flex-start; padding: 24px 28px 4px; border-bottom: none; }
+.modal-head h3 { font-size: 22px; font-weight: 700; }
+.modal-sub { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.modal-close { font-size: 26px; margin: -6px -6px 0 0; }
+.modal-body { padding: 14px 28px 22px; }
+.modal-footer { padding: 16px 28px 22px; }
+.btn-block { flex: 1; width: 100%; padding: 12px 18px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+.info-note { background: var(--accent-light); color: var(--muted); border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5; }
+
+.detail-list { display: flex; flex-direction: column; }
+.detail-row { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.detail-row:last-child { border-bottom: none; }
+.detail-row .k { color: var(--muted); }
+.detail-row .v { font-weight: 600; text-align: right; }
+
+.profile-box { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 6px; }
+.profile-avatar {
+  width: 64px; height: 64px; border-radius: 50%; background: var(--accent-soft);
+  display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; margin-bottom: 8px;
+}
+.profile-name { font-size: 17px; font-weight: 700; }
+.profile-email { font-size: 13.5px; }
+.profile-role { color: var(--muted); font-size: 12.5px; }
+
+@media (max-width: 720px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Hesab səhifəsi: geri linki + hesab seçimi ---------- */
+.acc-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-size: 12.5px; font-weight: 500; text-decoration: underline; }
+.back-link span { display: inline-flex; }
+.acc-switch {
+  border: 1px solid var(--border); background: #fff; border-radius: 10px;
+  padding: 10px 14px; font-size: 13.5px; color: var(--text); font-family: inherit; cursor: pointer;
+}
+.main { min-width: 0; }
+
+/* ---------- Kütləvi ödənişlər (CSV wizard) ---------- */
+.btn-sample { width: 100%; background: var(--accent-light); text-align: center; }
+.bulk-alert { background: var(--red-bg); color: #b42318; border-radius: 10px; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; }
+.bulk-alert ul { margin: 8px 0 0; padding-left: 18px; font-size: 12.5px; }
+.bulk-file-chip { background: var(--green-bg); color: var(--green); border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; word-break: break-word; }
+.bulk-file-chip.bad { background: var(--red-bg); color: #b42318; }
+.bulk-table-wrap { max-height: 220px; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+.bulk-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.bulk-table th { position: sticky; top: 0; background: #f7f9fd; text-align: left; color: var(--muted); padding: 8px 12px; font-weight: 600; }
+.bulk-table td { padding: 8px 12px; border-top: 1px solid var(--border); white-space: nowrap; }

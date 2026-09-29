@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 23092026_add_operation_account_fk
+      author: Subhan-Valili
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: account_operations
+            baseColumnNames: pasha_account_id
+            constraintName: fk_operation_pasha_account
+            referencedTableName: pasha_accounts
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT

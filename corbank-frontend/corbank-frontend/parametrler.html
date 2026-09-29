@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Parametrlər</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+<link rel="stylesheet" href="css/parametrler.css?v=1">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+    <!-- topbar injected by JS -->
+    <main class="pr-page">
+
+      <div class="pr-head">
+        <h1>Parametrlər</h1>
+      </div>
+
+      <section class="card pr-card">
+        <h2>Profil və görünüş</h2>
+
+        <div class="pr-grid">
+          <div class="pr-field">
+            <label for="prName">Ad və soyad</label>
+            <input class="pr-input" id="prName" type="text" autocomplete="off">
+          </div>
+          <div class="pr-field">
+            <label for="prEmail">E-poçt</label>
+            <input class="pr-input" id="prEmail" type="email" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="pr-toggle-row">
+          <div class="pr-toggle-text">
+            <div class="pr-toggle-title">Məbləğləri gizlət</div>
+            <div class="pr-toggle-sub">Hesab qalıqları və əməliyyat məbləğləri gizlədilir.</div>
+          </div>
+          <button class="pr-switch" id="hideAmountsSwitch" type="button" role="switch" aria-checked="false">
+            <span class="pr-switch-knob"></span>
+          </button>
+        </div>
+
+        <div class="pr-toggle-row">
+          <div class="pr-toggle-text">
+            <div class="pr-toggle-title">Bildiriş göstəricisi</div>
+            <div class="pr-toggle-sub">Oxunmamış bildirişlərin işarəsini göstər.</div>
+          </div>
+          <button class="pr-switch" id="notifDotSwitch" type="button" role="switch" aria-checked="true">
+            <span class="pr-switch-knob"></span>
+          </button>
+        </div>
+
+        <p class="pr-note">Seçimlər sessiyada tətbiq olunur və brauzer icazə verdikdə saxlanılır.</p>
+
+        <button class="btn-primary pr-save" id="saveBtn" type="button">Dəyişiklikləri saxla</button>
+      </section>
+
+      <div class="pr-demo-note">Demo məlumatlar</div>
+    </main>
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400000"></script>
+<script src="js/common.js?v=1791400000"></script>
+<script src="js/parametrler.js?v=1791400000"></script>
+</body>
+</html>

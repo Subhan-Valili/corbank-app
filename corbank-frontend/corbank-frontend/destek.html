@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Əlaqə və dəstək</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+<link rel="stylesheet" href="css/destek.css?v=1">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+    <!-- topbar injected by JS -->
+    <main class="ds-page">
+
+      <div class="ds-head">
+        <h1>Əlaqə və dəstək</h1>
+      </div>
+
+      <div class="ds-columns">
+        <section class="card ds-card">
+          <h2>Dəstək müraciəti</h2>
+
+          <div class="ds-field">
+            <label for="dsSubject">Mövzu</label>
+            <input class="ds-input" id="dsSubject" type="text" autocomplete="off">
+          </div>
+
+          <div class="ds-field">
+            <label for="dsMessage">Mesajınız</label>
+            <textarea class="ds-textarea" id="dsMessage" rows="6" placeholder="Müraciətinizi təsvir edin…"></textarea>
+          </div>
+
+          <div class="ds-field">
+            <label for="dsEmail">Əlaqə e-poçtu</label>
+            <input class="ds-input" id="dsEmail" type="email" autocomplete="off">
+          </div>
+
+          <div class="ds-form-footer">
+            <button class="btn-primary ds-submit" id="dsSubmit" type="button">
+              Demo müraciət yarat <span id="dsSendIcon"></span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card ds-card ds-faq">
+          <h2>Tez-tez verilən suallar</h2>
+          <div id="dsFaqList"></div>
+        </section>
+      </div>
+
+      <div class="ds-demo-note">Demo məlumatlar</div>
+    </main>
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400000"></script>
+<script src="js/common.js?v=1791400000"></script>
+<script src="js/destek.js?v=1791400000"></script>
+</body>
+</html>

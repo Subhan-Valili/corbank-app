@@ -1,0 +1,115 @@
+/* =====================================================================
+   Parametrlər səhifəsi (parametrler.html) — ayrıca stil faylı.
+   style.css-dən SONRA yüklənir; onun dəyişənlərindən (--accent, --border,
+   --muted və s.) və ümumi siniflərindən (.card, .btn-primary) istifadə edir.
+   Bütün yeni siniflər "pr-" ilə başlayır ki, digər səhifələrə təsir etməsin.
+   ===================================================================== */
+
+.pr-page {
+  flex: 1;
+  padding: 24px 28px 36px;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.pr-head { margin-bottom: 22px; }
+.pr-head h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.pr-card {
+  padding: 26px 28px;
+  border-radius: 16px;
+  max-width: 900px;
+}
+.pr-card h2 {
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+.pr-field { display: flex; flex-direction: column; gap: 8px; }
+.pr-field label { font-size: 13.5px; color: var(--muted); }
+.pr-input {
+  height: 44px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.pr-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(47, 95, 224, .12);
+}
+
+.pr-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+}
+.pr-toggle-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.pr-toggle-sub { font-size: 13px; color: var(--muted); }
+
+.pr-switch {
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: #1c2b52;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: background .15s ease;
+  margin-top: 2px;
+}
+.pr-switch.on { background: var(--accent); justify-content: flex-end; }
+.pr-switch-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+  box-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+
+.pr-note {
+  margin: 4px 0 22px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pr-save { padding: 11px 22px; font-size: 14px; }
+
+.pr-demo-note {
+  margin-top: 14px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .pr-page { padding: 18px 16px 28px; }
+  .pr-card { padding: 18px 16px; }
+  .pr-grid { grid-template-columns: 1fr; }
+}

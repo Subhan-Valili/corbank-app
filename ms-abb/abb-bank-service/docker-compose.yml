@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:17
+    container_name: abb-bank-service-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-abb_bank_service}
+      POSTGRES_USER: ${DB_USER:-abb}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-abb}
+    ports:
+      # Exposed on the host too, so you can point a DB client at it directly while debugging.
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - abb-bank-service-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-abb} -d ${DB_NAME:-abb_bank_service}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  abb-bank-service:
+    build: .
+    container_name: abb-bank-service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Inside the compose network, the DB is reachable at the service name "db", not localhost.
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-abb_bank_service}
+      DB_USER: ${DB_USER:-abb}
+      DB_PASSWORD: ${DB_PASSWORD:-abb}
+      ABB_API_BASE_URL: ${ABB_API_BASE_URL:-https://api-test-c2b.abb-bank.az}
+      ABB_API_USERNAME: ${ABB_API_USERNAME:-}
+      ABB_API_PASSWORD: ${ABB_API_PASSWORD:-}
+    ports:
+      - "8081:8081"
+
+volumes:
+  abb-bank-service-db-data:

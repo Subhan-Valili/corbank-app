@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Hesab</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+  <!-- topbar injected by JS -->
+  <main class="main">
+
+    <div class="acc-nav">
+      <a class="back-link" href="index.html"><span id="iconBack"></span>Əsas səhifəyə qayıt</a>
+      <select class="acc-switch" id="accountSwitch" aria-label="Hesab seçimi"></select>
+    </div>
+
+    <div class="card account-header">
+      <div class="account-header-left">
+        <div class="flag-lg" id="accFlag">🇦🇿</div>
+        <div>
+          <h1 id="accName">Hesab</h1>
+          <div class="iban-line">
+            <span id="accIban">—</span>
+            <button class="icon-btn" title="Kopyala" onclick="copyIban()"><span id="iconCopy"></span></button>
+            <span class="status-chip" id="accStatus"><span class="dot"></span>Aktiv</span>
+          </div>
+        </div>
+      </div>
+      <button class="hide-btn" id="hideBtn">Məbləğləri gizlət</button>
+    </div>
+
+    <div class="card report-period">
+      <span class="label">Hesabat dövrü</span>
+      <div class="field-group">
+        <label>Başlanğıc tarixi</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="field-group">
+        <label>Son tarix</label>
+        <input type="date" id="endDate">
+      </div>
+      <button class="btn-secondary" id="wholePeriodBtn">Bütün dövr</button>
+    </div>
+
+    <div class="summary-grid">
+      <div class="card summary-card">
+        <div class="top"><span class="label">Mövcud qalıq</span><span class="icon" id="iconBalance"></span></div>
+        <div class="value" id="sumBalance">—</div>
+        <div class="sub">Bütün yerinə yetirilmiş əməliyyatlar</div>
+      </div>
+      <div class="card summary-card">
+        <div class="top"><span class="label">Dövr üzrə mədaxil</span><span class="icon" id="iconIncome"></span></div>
+        <div class="value pos" id="sumIncome">—</div>
+        <div class="sub">Seçilmiş dövr · yerinə yetirilmiş</div>
+      </div>
+      <div class="card summary-card">
+        <div class="top"><span class="label">Dövr üzrə məxaric</span><span class="icon" id="iconExpense"></span></div>
+        <div class="value neg" id="sumExpense">—</div>
+        <div class="sub">Seçilmiş dövr · yerinə yetirilmiş</div>
+      </div>
+      <div class="card summary-card">
+        <div class="top"><span class="label">Xalis pul axını</span><span class="icon" id="iconNet"></span></div>
+        <div class="value" id="sumNet">—</div>
+        <div class="sub">Seçilmiş dövr · yerinə yetirilmiş</div>
+      </div>
+    </div>
+
+    <div class="card services-card">
+      <h3>Hesab üzrə xidmətlər</h3>
+      <div class="services-grid" id="servicesGrid"></div>
+    </div>
+
+    <div class="card tabs-card" id="tabsRow">
+      <button class="tab-btn active" data-tab="ops">Əməliyyatlar və çıxarış</button>
+      <button class="tab-btn" data-tab="analytics">Hesab analitikası</button>
+      <button class="tab-btn" data-tab="templates">Şablonlar</button>
+      <button class="tab-btn" data-tab="standing">Daimi ödənişlər</button>
+    </div>
+
+    <div class="card ops-card tab-panel active" id="panel-ops">
+      <div class="ops-card-head">
+        <h3>Əməliyyatlar və çıxarış</h3>
+        <div class="export-buttons">
+          <button class="export-btn" id="exportCsvBtn"><span id="iconCsv"></span> CSV / Excel üçün</button>
+          <button class="export-btn" id="exportPdfBtn"><span id="iconPdf"></span> PDF</button>
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <div class="field-group">
+          <label>Əməliyyat axtarışı</label>
+          <input class="search-input" id="searchInput" placeholder="Alıcı, təyinat və ya nömrə">
+        </div>
+        <div class="field-group">
+          <label>İstiqamət</label>
+          <select class="select-input" id="directionSelect">
+            <option value="all">Bütün əməliyyatlar</option>
+            <option value="in">Mədaxil</option>
+            <option value="out">Məxaric</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Status</label>
+          <select class="select-input" id="statusSelect">
+            <option value="all">Bütün statuslar</option>
+            <option value="completed">Yerinə yetirildi</option>
+            <option value="pending">Gözləmədə</option>
+            <option value="rejected">Rədd edildi</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Sıralama</label>
+          <select class="select-input" id="sortSelect">
+            <option value="newest">Ən yeni tarix</option>
+            <option value="oldest">Ən köhnə tarix</option>
+          </select>
+        </div>
+      </div>
+
+      <table class="ops-table">
+        <thead>
+          <tr><th>Tarix</th><th>Qarşı tərəf / Təyinat</th><th>Məbləğ</th><th>Status</th></tr>
+        </thead>
+        <tbody id="opsBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">Bu filtrlərə uyğun əməliyyat tapılmadı.</div>
+    </div>
+
+    <div class="card ops-card tab-panel" id="panel-analytics">
+      <div class="ops-card-head"><h3>Hesab analitikası</h3></div>
+      <div class="analytics-summary" id="analyticsSummary"></div>
+      <h4 style="margin:0 0 14px;">Qarşı tərəflər üzrə bölgü (seçilmiş dövr)</h4>
+      <div id="analyticsBars"></div>
+      <div class="empty-state" id="analyticsEmpty" style="display:none;">Seçilmiş dövrdə əməliyyat yoxdur.</div>
+    </div>
+
+    <div class="card ops-card tab-panel" id="panel-templates">
+      <div class="ops-card-head">
+        <h3>Şablonlar</h3>
+        <button class="btn-primary" id="addTemplateBtn">+ Yeni şablon</button>
+      </div>
+      <div id="templatesList"></div>
+      <div class="empty-state" id="templatesEmpty" style="display:none;">Hələ şablon yoxdur.</div>
+    </div>
+
+    <div class="card ops-card tab-panel" id="panel-standing">
+      <div class="ops-card-head">
+        <h3>Daimi ödənişlər</h3>
+        <button class="btn-primary" id="addStandingBtn">+ Yeni daimi ödəniş</button>
+      </div>
+      <div id="standingList"></div>
+      <div class="empty-state" id="standingEmpty" style="display:none;">Hələ daimi ödəniş yoxdur.</div>
+    </div>
+  </main>
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400000"></script>
+<script src="js/common.js?v=1791400000"></script>
+<script src="js/account.js?v=1791400000"></script>
+</body>
+</html>

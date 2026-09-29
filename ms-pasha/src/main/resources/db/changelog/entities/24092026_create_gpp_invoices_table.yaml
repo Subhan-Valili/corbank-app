@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: 24092026_create_gpp_invoices_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: gpp_invoices
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: external_invoice_id, type: VARCHAR(255) }
+              - column: { name: invoice_code, type: VARCHAR(255) }
+              - column: { name: invoice_type, type: VARCHAR(50) }
+              - column: { name: state_code, type: VARCHAR(50) }
+              - column: { name: receipt_number, type: VARCHAR(255) }
+              - column: { name: fee_calculation_method, type: VARCHAR(50) }
+              - column: { name: amount_due, type: "DECIMAL(15,2)" }
+              - column: { name: commission_amount, type: "DECIMAL(15,2)" }
+              - column: { name: current_debt, type: "DECIMAL(15,2)" }
+              - column: { name: max_allowed_amount, type: "DECIMAL(15,2)" }
+              - column: { name: min_allowed_amount, type: "DECIMAL(15,2)" }
+              - column: { name: partial_payment_allowed, type: BOOLEAN }
+              - column: { name: manual_payment_receiver_selection_required, type: BOOLEAN }
+              - column: { name: manual_sp_branch_selection_required, type: BOOLEAN }
+              - column: { name: service_code, type: INT }
+              - column: { name: service_description, type: VARCHAR(255) }
+              - column: { name: sp_branch_code, type: INT }
+              - column: { name: sp_branch_description, type: VARCHAR(255) }
+              - column: { name: payment_receiver_code, type: INT }
+              - column: { name: payment_receiver_description, type: VARCHAR(255) }
+              - column: { name: payment_id, type: BIGINT, constraints: { nullable: false } }
+
+        - createTable:
+            tableName: gpp_invoice_payment_receivers
+            columns:
+              - column: { name: invoice_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: code, type: INT }
+              - column: { name: description, type: VARCHAR(255) }
+
+        - createIndex:
+            indexName: idx_gpp_invoice_payment_id
+            tableName: gpp_invoices
+            columns:
+              - column: { name: payment_id }

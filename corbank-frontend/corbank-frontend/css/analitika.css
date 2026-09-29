@@ -1,0 +1,119 @@
+/* =====================================================================
+   Analitika səhifəsi (analitika.html) — ayrıca stil faylı.
+   style.css-dən SONRA yüklənir; onun dəyişənlərindən (--accent, --border,
+   --muted, --green, --red və s.) istifadə edir.
+   Bütün yeni siniflər "an-" ilə başlayır ki, digər səhifələrə təsir etməsin.
+   ===================================================================== */
+
+.an-page {
+  flex: 1;
+  padding: 24px 28px 36px;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.an-head { margin-bottom: 22px; }
+.an-head h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--text);
+}
+.an-head p { margin: 0; font-size: 14px; color: var(--muted); }
+
+.an-card { padding: 22px 24px; border-radius: 16px; margin-bottom: 20px; }
+.an-card h2 { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+
+/* ---------- Filters ---------- */
+.an-filters-card { padding: 20px 24px; }
+.an-filters { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.an-field { display: flex; flex-direction: column; gap: 6px; }
+.an-field label { font-size: 13px; color: var(--muted); }
+.an-input {
+  height: 42px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.an-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(47, 95, 224, .12); }
+.an-fx-note { color: var(--muted); font-size: 12.5px; line-height: 1.5; padding-bottom: 2px; }
+
+/* ---------- Summary cards ---------- */
+.an-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 20px; }
+.an-summary-card { padding: 20px 22px; }
+.an-summary-lbl { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.an-summary-val { font-size: 26px; font-weight: 700; color: var(--text); }
+.an-summary-val.income { color: var(--green); }
+.an-summary-val.expense { color: var(--red); }
+
+/* ---------- Dynamics chart ---------- */
+.an-chart-sub { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); }
+.an-chart-legend { display: flex; gap: 28px; margin-bottom: 12px; flex-wrap: wrap; }
+.an-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.an-legend-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.an-legend-item .name { color: var(--muted); }
+.an-legend-item .val { font-weight: 700; color: var(--text); }
+
+.an-chart-wrap { width: 100%; overflow: hidden; }
+.an-chart-wrap svg { width: 100%; height: auto; display: block; }
+.an-axis-line text { font-size: 11px; fill: var(--muted); }
+.an-grid-line { stroke: var(--border); stroke-width: 1; }
+
+.an-netflow {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-size: 14px; color: var(--text);
+}
+.an-netflow span:last-child { font-size: 19px; font-weight: 700; }
+.an-netflow span:last-child.neg { color: var(--red); }
+.an-netflow span:last-child.pos { color: var(--green); }
+
+/* ---------- Split rows (donuts, contragents) ---------- */
+.an-split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+.an-donut-body { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.an-donut-body svg { flex-shrink: 0; }
+.an-donut-center-val { font-size: 14px; font-weight: 700; fill: var(--text); }
+.an-donut-center-lbl { font-size: 11px; fill: var(--muted); }
+
+.an-donut-legend { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 14px; }
+.an-donut-legend-row { display: flex; align-items: center; gap: 10px; }
+.an-donut-legend-row .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.an-donut-legend-row .name { flex: 1; font-size: 13.5px; color: var(--text); }
+.an-donut-legend-row .val { font-size: 13.5px; font-weight: 700; text-align: right; white-space: nowrap; }
+.an-donut-legend-row .pct { font-size: 12.5px; color: var(--muted); width: 46px; text-align: right; flex-shrink: 0; }
+
+/* ---------- Top contragents ---------- */
+.an-cp-row { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.an-cp-row:last-child { border-bottom: none; }
+.an-cp-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.an-cp-name { font-size: 14px; font-weight: 500; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-cp-val { font-size: 14px; font-weight: 700; white-space: nowrap; }
+.an-cp-track { background: var(--accent-light); border-radius: 6px; height: 8px; overflow: hidden; }
+.an-cp-fill { height: 100%; border-radius: 6px; background: var(--green); }
+.an-cp-fill.out { background: var(--red); }
+
+.an-empty { text-align: center; padding: 30px 0; color: var(--muted); font-size: 13.5px; }
+.an-error { text-align: center; padding: 20px; color: var(--red); font-size: 14px; }
+
+/* ---------- Footer note ---------- */
+.an-demo-note { text-align: right; font-size: 13px; color: var(--muted); margin-top: -4px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1150px) {
+  .an-summary-grid { grid-template-columns: 1fr; }
+  .an-split-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .an-page { padding: 18px 16px 28px; }
+  .an-filters { flex-direction: column; align-items: stretch; }
+  .an-card { padding: 18px 16px; }
+  .an-donut-body { flex-direction: column; align-items: flex-start; }
+}

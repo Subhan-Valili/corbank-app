@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: ms-corbank
+
+server:
+  port: 8082
+
+ms-pasha:
+  base-url: http://localhost:9090
+
+ms-abb:
+  base-url: ${MS_ABB_BASE_URL:http://localhost:8083}
+
+corbank:
+  customer-no: ${CORBANK_CUSTOMER_NO:CUST-998877}

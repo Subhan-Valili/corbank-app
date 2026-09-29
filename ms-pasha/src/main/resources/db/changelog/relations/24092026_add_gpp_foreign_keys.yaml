@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 24092026_add_gpp_foreign_keys
+      author: Subhan-Valili
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: gpp_payment_service_codes
+            baseColumnNames: payment_id
+            constraintName: fk_gpp_payment_sc_payment
+            referencedTableName: gpp_payments
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+        - addForeignKeyConstraint:
+            baseTableName: gpp_invoices
+            baseColumnNames: payment_id
+            constraintName: fk_gpp_invoice_payment
+            referencedTableName: gpp_payments
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+        - addForeignKeyConstraint:
+            baseTableName: gpp_invoice_payment_receivers
+            baseColumnNames: invoice_id
+            constraintName: fk_gpp_invoice_pr_invoice
+            referencedTableName: gpp_invoices
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+        - addForeignKeyConstraint:
+            baseTableName: gpp_child_invoices
+            baseColumnNames: invoice_id
+            constraintName: fk_gpp_child_invoice_invoice
+            referencedTableName: gpp_invoices
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT

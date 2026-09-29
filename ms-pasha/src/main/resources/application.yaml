@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: ms-pasha-bank
+  profiles:
+    include:
+      - db
+
+server:
+  port: 9090
+

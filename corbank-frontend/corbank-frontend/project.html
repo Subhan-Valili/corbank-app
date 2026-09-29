@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Layihə</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+</head>
+<body>
+<div class="app" id="app">
+  <main class="main">
+
+    <div class="card account-header">
+      <div class="account-header-left">
+        <div class="flag-lg" id="projIcon">💳</div>
+        <div>
+          <h1 id="projName">Layihə</h1>
+          <div class="iban-line">
+            <span id="projSubtitle">—</span>
+          </div>
+        </div>
+      </div>
+      <a class="hide-btn" href="index.html">← Əsas səhifəyə qayıt</a>
+    </div>
+
+    <div class="summary-grid" id="summaryGrid" style="grid-template-columns: 1fr; margin-bottom: 20px;">
+      <div class="card summary-card">
+        <div class="top"><span class="label" id="mainAmountLabel">Məbləğ</span></div>
+        <div class="value" id="mainAmount" style="font-size:28px;">—</div>
+      </div>
+    </div>
+
+    <div class="card services-card">
+      <h3>Təfərrüatlar</h3>
+      <table class="ops-table">
+        <tbody id="detailsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card ops-card" id="opsSection">
+      <div class="ops-card-head">
+        <h3>Bu layihə üzrə son əməliyyatlar</h3>
+      </div>
+      <table class="ops-table">
+        <thead>
+          <tr><th>Tarix</th><th>Qarşı tərəf / Təyinat</th><th>Məbləğ</th><th>Status</th></tr>
+        </thead>
+        <tbody id="opsBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">Bu layihə üzrə əməliyyat tapılmadı.</div>
+    </div>
+  </main>
+</div>
+
+<script src="js/config.js?v=1791400000"></script>
+<script src="js/common.js?v=1791400000"></script>
+<script src="js/project.js?v=1791400000"></script>
+</body>
+</html>

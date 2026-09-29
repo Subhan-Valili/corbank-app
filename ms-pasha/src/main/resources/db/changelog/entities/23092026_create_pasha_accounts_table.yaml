@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 23092026_create_pasha_accounts_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: pasha_accounts
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: account_id, type: VARCHAR(255), constraints: { nullable: false, unique: true } }
+              - column: { name: customer_no, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: account_category, type: VARCHAR(255) }
+              - column: { name: account_no, type: VARCHAR(255) }
+              - column: { name: account_open_date, type: DATE }
+              - column: { name: account_status, type: VARCHAR(255) }
+              - column: { name: account_type, type: VARCHAR(255) }
+              - column: { name: available_balance, type: "DECIMAL(15,2)" }
+              - column: { name: current_balance, type: "DECIMAL(15,2)" }
+              - column: { name: blocked_amount, type: "DECIMAL(15,2)" }
+              - column: { name: currency, type: VARCHAR(3), constraints: { nullable: false } }
+              - column: { name: iban, type: VARCHAR(255), constraints: { nullable: false, unique: true } }
+              - column: { name: bank_code, type: VARCHAR(255) , constraints: { nullable: false } }
+              - column: { name: branch_code, type: VARCHAR(255) , constraints: { nullable: false } }
+              - column: { name: branch_name, type: VARCHAR(255) , constraints: { nullable: false } }
+              - column: { name: tin, type: VARCHAR(255) }
+              - column: { name: credit_is_allowed, type: BOOLEAN }
+              - column: { name: debit_is_allowed, type: BOOLEAN }
+              - column: { name: has_card, type: BOOLEAN }
+              - column: { name: has_credit, type: BOOLEAN }
+              - column: { name: has_pos, type: BOOLEAN }
+              - column: { name: today_income, type: "DECIMAL(15,2)" }
+              - column: { name: today_opening_balance, type: "DECIMAL(15,2)" }
+              - column: { name: today_outcome, type: "DECIMAL(15,2)" }
+
+        - createIndex:
+            indexName: idx_pasha_iban
+            tableName: pasha_accounts
+            columns:
+              - column: { name: iban }
+
+        - createIndex:
+            indexName: idx_pasha_customer_no
+            tableName: pasha_accounts
+            columns:
+              - column: { name: customer_no }

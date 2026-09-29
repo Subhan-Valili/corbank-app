@@ -1,0 +1,249 @@
+/* =====================================================================
+   Mühasibatlıq səhifəsi (muhasibatliq.html) — ayrıca stil faylı.
+   style.css-dən SONRA yüklənir; onun dəyişənlərindən (--accent, --border,
+   --muted və s.) və ümumi siniflərindən (.card, .op-icon, .amount ...) istifadə edir.
+   Bütün yeni siniflər "mh-" ilə başlayır ki, digər səhifələrə təsir etməsin.
+   ===================================================================== */
+
+/* ---------- Page ---------- */
+.mh-page {
+  flex: 1;
+  padding: 24px 28px 36px;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.mh-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.mh-head h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--text);
+}
+.mh-head p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.mh-csv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f7f9fd;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.mh-csv-btn:hover { background: #fff; }
+
+/* ---------- 6 xidmət kartı ---------- */
+.mh-tools {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mh-tool {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  min-height: 110px;
+  padding: 0 22px;
+  border-radius: 16px;
+  color: var(--text);
+  text-align: left;
+  font-size: 16px;
+  font-weight: 700;
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+.mh-tool:hover {
+  box-shadow: 0 4px 20px rgba(22, 33, 62, .09);
+  transform: translateY(-1px);
+}
+.mh-tool-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ---------- Kart başlıqları ---------- */
+.mh-card {
+  padding: 22px 24px;
+  border-radius: 16px;
+}
+.mh-card h2 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ---------- Filtrlər ---------- */
+.mh-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.mh-field { display: flex; flex-direction: column; gap: 6px; }
+.mh-field label { font-size: 13px; color: var(--muted); }
+.mh-field--search { flex: 0 1 430px; min-width: 0; }
+.mh-field--select { flex: 0 0 215px; }
+
+.mh-input,
+.mh-select {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.mh-input::placeholder { color: var(--muted); }
+.mh-input:focus,
+.mh-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(47, 95, 224, .12);
+}
+.mh-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7896' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* ---------- Cədvəl ---------- */
+.mh-table-wrap { overflow-x: auto; }
+
+.mh-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.mh-table thead th {
+  background: #f2f5fb;
+  padding: 13px 14px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.mh-table thead th:first-child { border-radius: 10px 0 0 10px; }
+.mh-table thead th:last-child  { border-radius: 0 10px 10px 0; }
+
+.mh-table th:nth-child(1) { width: 15%; }
+.mh-table th:nth-child(2) { width: 44%; }
+.mh-table th:nth-child(3) { width: 21%; }
+.mh-table th:nth-child(4) { width: 20%; }
+
+.mh-table tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  vertical-align: middle;
+}
+.mh-table .mh-date { color: var(--muted); font-size: 13px; }
+.mh-table .op-name { font-weight: 400; font-size: 14px; }
+.mh-table .op-desc { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
+.mh-table .amount { font-weight: 500; white-space: nowrap; }
+
+/* Status pill (style.css-dəki .status-chip-in üstündən) */
+.mh-table .status-chip {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--green-bg);
+  font-weight: 500;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.mh-table .status-chip.pending  { background: #fdf5e0; }
+.mh-table .status-chip.rejected { background: var(--red-bg); }
+
+.mh-empty,
+.mh-error {
+  text-align: center;
+  padding: 44px 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.mh-error { color: var(--red); }
+
+/* ---------- Səhifələmə ---------- */
+.mh-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+.mh-count { font-size: 13px; color: var(--muted); }
+.mh-pager-controls { display: flex; align-items: center; gap: 12px; }
+.mh-pager-btn {
+  padding: 9px 16px;
+  background: #f7f9fd;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.mh-pager-btn:hover:not(:disabled) { background: #fff; }
+.mh-pager-btn:disabled { opacity: .45; cursor: default; }
+.mh-pager-info { font-size: 13.5px; min-width: 36px; text-align: center; }
+
+/* ---------- Müraciətlərim ---------- */
+.mh-requests { margin-top: 20px; }
+.mh-requests .mh-empty { padding: 48px 16px 40px; }
+
+/* ---------- Alt qeyd ---------- */
+.mh-demo-note {
+  margin-top: 14px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .mh-tools { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 720px) {
+  .mh-page { padding: 18px 16px 28px; }
+  .mh-head { flex-direction: column; }
+  .mh-tools { grid-template-columns: 1fr; }
+  .mh-tool { min-height: 88px; }
+  .mh-filters { flex-direction: column; align-items: stretch; }
+  .mh-field--search,
+  .mh-field--select { flex: none; }
+  .mh-card { padding: 18px 16px; }
+}

@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 24092026_create_gpp_payments_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: gpp_payments
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: external_payment_id, type: BIGINT }
+              - column: { name: description, type: VARCHAR(255) }
+              - column: { name: status, type: VARCHAR(50) }
+              - column: { name: type, type: VARCHAR(50) }
+              - column: { name: bank_status_code, type: VARCHAR(50) }
+              - column: { name: reject_reason, type: VARCHAR(1000) }
+              - column: { name: transfer_amount, type: "DECIMAL(15,2)" }
+              - column: { name: commission_amount, type: "DECIMAL(15,2)" }
+              - column: { name: create_date, type: TIMESTAMP }
+              - column: { name: payer_account_number, type: VARCHAR(255) }
+              - column: { name: payer_tin, type: VARCHAR(255) }
+              - column: { name: payer_type, type: VARCHAR(50) }
+              - column: { name: invoice_request_code, type: VARCHAR(255) }
+              - column: { name: invoice_request_prefix, type: VARCHAR(255) }
+              - column: { name: invoice_request_additional_code, type: VARCHAR(255) }
+              - column: { name: invoice_request_identification_subtype, type: VARCHAR(255) }
+              - column: { name: invoice_request_sc_code, type: INT }
+              - column: { name: invoice_request_sp_code, type: INT }
+
+        - createTable:
+            tableName: gpp_payment_service_codes
+            columns:
+              - column: { name: payment_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: service_code, type: INT }
+
+        - createIndex:
+            indexName: idx_gpp_payment_external_id
+            tableName: gpp_payments
+            columns:
+              - column: { name: external_payment_id }
+
+        - createIndex:
+            indexName: idx_gpp_payment_payer_account
+            tableName: gpp_payments
+            columns:
+              - column: { name: payer_account_number }
