@@ -2,6 +2,7 @@ package az.corbank.abb.config;
 
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -17,8 +18,8 @@ public class RestClientConfig {
     @Bean
     public RestClient abbRestClient(AbbProperties props) {
         var requestConfig = RequestConfig.custom()
-                .setConnectTimeout(java.time.Duration.ofMillis(props.connectTimeoutMs()))
-                .setResponseTimeout(java.time.Duration.ofMillis(props.readTimeoutMs()))
+                .setConnectTimeout(Timeout.of(java.time.Duration.ofMillis(props.connectTimeoutMs())))
+                .setResponseTimeout(Timeout.of(java.time.Duration.ofMillis(props.readTimeoutMs())))
                 .build();
 
         var httpClient = HttpClientBuilder.create()

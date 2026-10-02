@@ -1,0 +1,45 @@
+{
+  "groups": [
+    {
+      "name": "abb.api",
+      "type": "az.corbank.abb.config.AbbProperties",
+      "sourceType": "az.corbank.abb.config.AbbProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "abb.api.base-url",
+      "type": "java.lang.String",
+      "sourceType": "az.corbank.abb.config.AbbProperties"
+    },
+    {
+      "name": "abb.api.connect-timeout-ms",
+      "type": "java.lang.Integer",
+      "sourceType": "az.corbank.abb.config.AbbProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "abb.api.mock-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "az.corbank.abb.config.AbbProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "abb.api.password",
+      "type": "java.lang.String",
+      "sourceType": "az.corbank.abb.config.AbbProperties"
+    },
+    {
+      "name": "abb.api.read-timeout-ms",
+      "type": "java.lang.Integer",
+      "sourceType": "az.corbank.abb.config.AbbProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "abb.api.username",
+      "type": "java.lang.String",
+      "sourceType": "az.corbank.abb.config.AbbProperties"
+    }
+  ],
+  "hints": []
+}
