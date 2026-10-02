@@ -6,6 +6,7 @@ import az.corbank.abb.config.AbbProperties;
 import az.corbank.abb.domain.exception.AbbGatewayException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -62,8 +63,16 @@ class AbbTokenService {
             log.debug("Fetched new ABB access token, valid until {}", expiresAt);
             return response.accessToken();
         } catch (RestClientResponseException ex) {
+            // ABB responded, but with an error status (4xx/5xx) — we have a status code + body.
             log.warn("ABB auth/token failed: {} {}", ex.getStatusCode(), ex.getResponseBodyAsString());
             throw new AbbGatewayException("ABB auth/token failed: " + ex.getStatusCode(), ex);
+        } catch (ResourceAccessException ex) {
+            // Connection never completed at all (DNS failure, connection reset, TLS handshake
+            // aborted, timeout, IP not whitelisted, etc.) — no HTTP response to report, just
+            // the underlying I/O failure. This is the case a sandbox with network-level
+            // restrictions (IP whitelisting, required mTLS/VPN) actually hits.
+            log.warn("ABB auth/token unreachable: {}", ex.getMessage());
+            throw new AbbGatewayException("ABB auth/token unreachable: " + ex.getMessage(), ex);
         }
     }
 

@@ -3,10 +3,10 @@ spring:
     name: ms-corbank
 
 server:
-  port: 8082
+  port: ${PORT:8082}
 
 ms-pasha:
-  base-url: http://localhost:9090
+  base-url: ${MS_PASHA_BASE_URL:http://localhost:9090}
 
 ms-abb:
   base-url: ${MS_ABB_BASE_URL:http://localhost:8083}

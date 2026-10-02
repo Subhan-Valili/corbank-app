@@ -4,9 +4,9 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   datasource:
-    url: jdbc:postgresql://localhost:5430/pasha_db
-    username: admin
-    password: admin123
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5430}/${DB_NAME:pasha_db}
+    username: ${DB_USER:admin}
+    password: ${DB_PASSWORD:admin123}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -14,6 +14,3 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
-    properties:
-      hibernate:
-#        format_sql: true

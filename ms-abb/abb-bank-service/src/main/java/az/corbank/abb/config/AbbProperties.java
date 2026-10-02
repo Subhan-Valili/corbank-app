@@ -15,6 +15,13 @@ public record AbbProperties(
         String username,
         String password,
         int connectTimeoutMs,
-        int readTimeoutMs
+        int readTimeoutMs,
+        /**
+         * When true, AbbMockGateway serves canned accounts/statement data instead of
+         * AbbHttpGateway calling the real ABB API — see both classes' javadoc. Flip to
+         * false once real network access (whitelisting/VPN/mTLS) and credentials are in
+         * place; exactly one of the two gateway beans is ever active, picked by this flag.
+         */
+        boolean mockEnabled
 ) {
 }

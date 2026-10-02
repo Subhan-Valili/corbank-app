@@ -1,74 +1,64 @@
 package az.corbank.abb.application.service;
 
-import az.corbank.abb.application.port.in.*;
+import az.corbank.abb.application.port.in.SubmitPaymentUseCase;
 import az.corbank.abb.application.port.out.AbbBankGateway;
-import az.corbank.abb.application.port.out.PaymentBatchRepositoryPort;
-import az.corbank.abb.domain.exception.PaymentBatchNotFoundException;
-import az.corbank.abb.domain.model.*;
+import az.corbank.abb.domain.exception.AbbGatewayException;
+import az.corbank.abb.domain.model.CorporateAccount;
+import az.corbank.abb.domain.model.PaymentInstruction;
+import az.corbank.abb.domain.model.PaymentOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Orchestrates AbbBankGateway (out port) and PaymentBatchRepositoryPort (out port) for
- * every payment-related use case. Two pieces of real domain behavior live here:
- *   - submit(): a batch is a genuinely new aggregate the moment ABB accepts it, so it's
- *     created and persisted here, not just passed through.
- *   - getBatchStatus(): applies ABB's latest status onto the existing PaymentBatch
- *     aggregate (PaymentBatch.applyRemoteStatus()) and re-persists it — the aggregate
- *     owns that state transition, this service just drives it.
+ * Checks that the source account exists and has sufficient balance BEFORE calling the
+ * gateway — this business rule applies the same way whether the gateway is the real ABB
+ * API or the mock (both just execute the transfer once we know it's valid), so it lives
+ * here rather than being duplicated in each gateway implementation.
  */
-public class PaymentApplicationService implements
-        SubmitPaymentUseCase, VerifyOtpUseCase, GetBatchStatusUseCase,
-        GetIndividualPaymentUseCase, GetFileStatusUseCase, ListPaymentBatchesUseCase {
+public class PaymentApplicationService implements SubmitPaymentUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentApplicationService.class);
 
     private final AbbBankGateway gateway;
-    private final PaymentBatchRepositoryPort batchRepository;
 
-    public PaymentApplicationService(AbbBankGateway gateway, PaymentBatchRepositoryPort batchRepository) {
+    public PaymentApplicationService(AbbBankGateway gateway) {
         this.gateway = gateway;
-        this.batchRepository = batchRepository;
     }
 
     @Override
-    public PaymentBatch submit(PaymentSubmission submission) {
-        String batchNumber = gateway.submitPayment(submission);
-        PaymentBatch batch = PaymentBatch.newlySubmitted(batchNumber, submission.externalReference(), submission.type());
-        batchRepository.save(batch);
-        log.info("Submitted {} payment batch {}", submission.type(), batchNumber);
-        return batch;
+    public PaymentOutcome submit(PaymentInstruction instruction) {
+        if (instruction.amount() == null || instruction.amount().signum() <= 0) {
+            return PaymentOutcome.rejected("Məbləğ düzgün deyil.");
+        }
+
+        List<CorporateAccount> accounts = gateway.listAccounts();
+        Optional<CorporateAccount> from = accounts.stream()
+                .filter(a -> matches(a, instruction.fromAccountNumber()))
+                .findFirst();
+
+        if (from.isEmpty()) {
+            return PaymentOutcome.rejected("Mənbə hesabı tapılmadı.");
+        }
+
+        BigDecimal balance = from.get().availableBalance();
+        if (balance == null || balance.compareTo(instruction.amount()) < 0) {
+            return PaymentOutcome.rejected("Hesabda kifayət qədər vəsait yoxdur.");
+        }
+
+        try {
+            String reference = gateway.submitPayment(instruction);
+            return PaymentOutcome.completed(reference);
+        } catch (AbbGatewayException e) {
+            log.warn("ABB ödəniş sorğusunu rədd etdi: {}", e.getMessage());
+            return PaymentOutcome.rejected("ABB ödənişi qəbul etmədi: " + e.getMessage());
+        }
     }
 
-    @Override
-    public String verifyOtp(String batchNumber, String otpCode) {
-        return gateway.verifyOtp(batchNumber, otpCode);
-    }
-
-    @Override
-    public PaymentBatch getBatchStatus(String batchNumber) {
-        PaymentBatch batch = batchRepository.findByBatchNumber(batchNumber)
-                .orElseThrow(() -> new PaymentBatchNotFoundException(batchNumber));
-
-        AbbBankGateway.BatchStatusResult result = gateway.getBatchStatus(batchNumber, batch.type().isSalary());
-        batch.applyRemoteStatus(result.status(), result.statusDescription(), result.payments());
-        return batchRepository.save(batch);
-    }
-
-    @Override
-    public PaymentLine getPayment(String batchNumber, String paymentId) {
-        return gateway.getIndividualPayment(batchNumber, paymentId);
-    }
-
-    @Override
-    public FileStatus getFileStatus(String externalReference) {
-        return gateway.getFileStatus(externalReference);
-    }
-
-    @Override
-    public List<PaymentBatch> listBatches() {
-        return batchRepository.findAllOrderBySubmittedAtDesc();
+    private boolean matches(CorporateAccount account, String accountNumber) {
+        return accountNumber.equalsIgnoreCase(account.accountNumber()) || accountNumber.equalsIgnoreCase(account.iban());
     }
 }

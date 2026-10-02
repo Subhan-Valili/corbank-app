@@ -1,7 +1,6 @@
 package az.corbank.abb.adapter.in.web;
 
 import az.corbank.abb.domain.exception.AbbGatewayException;
-import az.corbank.abb.domain.exception.PaymentBatchNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +19,6 @@ class GlobalExceptionHandler {
     ResponseEntity<Map<String, Object>> handleGateway(AbbGatewayException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(errorBody("ABB_UPSTREAM_ERROR", "ABB Bank API rejected or failed the request."));
-    }
-
-    @ExceptionHandler(PaymentBatchNotFoundException.class)
-    ResponseEntity<Map<String, Object>> handleNotFound(PaymentBatchNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody("NOT_FOUND", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

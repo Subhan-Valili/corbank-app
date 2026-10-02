@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: ${PORT:8083}
 
 spring:
   application:
@@ -34,6 +34,13 @@ abb:
     password: ${ABB_API_PASSWORD:}
     connect-timeout-ms: 5000
     read-timeout-ms: 15000
+    # TRUE right now on purpose: there's no real network access to ABB's sandbox yet
+    # (IP whitelisting / VPN / mTLS not sorted out — see the "Connection reset" errors when
+    # this was false). Serves canned accounts/statement data (AbbMockGateway) so the
+    # dashboard isn't empty while that gets sorted out. Set to false (or export
+    # ABB_API_MOCK_ENABLED=false) the moment real access + credentials are ready — nothing
+    # else needs to change, AbbHttpGateway takes over automatically.
+    mock-enabled: ${ABB_API_MOCK_ENABLED:true}
 
 logging:
   level:

@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17
+    image: postgres:16-alpine
     container_name: abb-bank-service-db
     restart: unless-stopped
     environment:
@@ -36,7 +36,7 @@ services:
       ABB_API_USERNAME: ${ABB_API_USERNAME:-}
       ABB_API_PASSWORD: ${ABB_API_PASSWORD:-}
     ports:
-      - "8081:8081"
+      - "8083:8083"
 
 volumes:
   abb-bank-service-db-data:
