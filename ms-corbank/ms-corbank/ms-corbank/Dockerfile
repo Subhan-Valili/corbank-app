@@ -1,8 +1,7 @@
-FROM amazoncorretto:21-alpine AS build
+FROM gradle:8.5-jdk21 AS build
 WORKDIR /app
 COPY . .
-RUN chmod +x gradlew
-RUN ./gradlew bootJar -x test
+RUN gradle bootJar -x test
 
 FROM amazoncorretto:21-alpine
 WORKDIR /app
