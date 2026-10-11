@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: ms-corbank-postgres
+    environment:
+      POSTGRES_DB: db_corbank
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "1111:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ms-corbank-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --notify-keyspace-events Ex
+
+volumes:
+  postgres_data:
+  redis_data:

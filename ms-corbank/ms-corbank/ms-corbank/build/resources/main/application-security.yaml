@@ -1,0 +1,6 @@
+app:
+  security:
+    jwt:
+      secret-key: "mySecretKeyMySecretKeyMySecretKeyMySecretKeyMySecretKeyMySecretKey"
+      expiration-time: 600000 # 5 dəqiqə (milisaniyə ilə: 1000 * 60 * 5)
+      refresh-expiration: 604800 # 7 gün saniyə ilə (Refresh Token üçün)

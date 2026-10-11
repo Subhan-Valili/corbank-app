@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 06102026_create_permissions_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: permissions
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: name, type: VARCHAR(100), constraints: { nullable: false, unique: true } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }

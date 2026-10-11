@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - includeAll:
+      path: db/changelog/entities/
+  - includeAll:
+      path: db/changelog/relationships/
+  - include:
+      file: db/changelog/data/06102026_insert_data.yaml

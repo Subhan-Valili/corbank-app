@@ -1,6 +1,12 @@
 spring:
   application:
     name: ms-corbank
+  profiles:
+    include:
+      - db
+      - email
+      - redis
+      - security
 
 server:
   port: ${PORT:8082}
