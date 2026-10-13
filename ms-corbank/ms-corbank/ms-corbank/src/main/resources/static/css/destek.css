@@ -1,0 +1,114 @@
+/* =====================================================================
+   Əlaqə və dəstək səhifəsi (destek.html) — ayrıca stil faylı.
+   style.css-dən SONRA yüklənir; onun dəyişənlərindən (--accent, --border,
+   --muted və s.) və ümumi siniflərindən (.card, .btn-primary) istifadə edir.
+   Bütün yeni siniflər "ds-" ilə başlayır ki, digər səhifələrə təsir etməsin.
+   ===================================================================== */
+
+.ds-page {
+  flex: 1;
+  padding: 24px 28px 36px;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.ds-head { margin-bottom: 22px; }
+.ds-head h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ds-columns {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.ds-card {
+  padding: 24px 26px;
+  border-radius: 16px;
+}
+.ds-card h2 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ds-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.ds-field label { font-size: 13.5px; color: var(--muted); }
+.ds-input,
+.ds-textarea {
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.ds-input { height: 44px; }
+.ds-textarea { resize: vertical; min-height: 130px; line-height: 1.5; }
+.ds-input:focus,
+.ds-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(47, 95, 224, .12);
+}
+.ds-input::placeholder,
+.ds-textarea::placeholder { color: var(--muted); }
+
+.ds-form-footer { display: flex; justify-content: flex-end; margin-top: 4px; }
+.ds-submit { display: inline-flex; align-items: center; gap: 10px; padding: 11px 20px; font-size: 14px; }
+.ds-submit svg { display: block; }
+
+/* ---------- FAQ akkordeon ---------- */
+.ds-faq-item { border-top: 1px solid var(--border); }
+.ds-faq-item:first-child { border-top: none; }
+.ds-faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 2px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.ds-faq-q .ds-faq-chev {
+  flex-shrink: 0;
+  display: flex;
+  color: var(--muted);
+  transition: transform .15s ease;
+}
+.ds-faq-item.open .ds-faq-q .ds-faq-chev { transform: rotate(180deg); }
+.ds-faq-a {
+  display: none;
+  padding: 0 2px 18px;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.ds-faq-item.open .ds-faq-a { display: block; }
+
+.ds-demo-note {
+  margin-top: 14px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (max-width: 1000px) {
+  .ds-columns { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .ds-page { padding: 18px 16px 28px; }
+  .ds-card { padding: 18px 16px; }
+}

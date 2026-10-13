@@ -14,10 +14,12 @@ import java.util.List;
 public class GppPaymentController {
 
     private final GppApiFeignClient gppApiFeignClient;
+    private final PayerOwnershipGuard payerGuard;
 
     @PostMapping
     public ResponseEntity<GppPaymentResponseDto> createPayment(
             @RequestBody GppPaymentRequestDto request) {
+        payerGuard.requireOwned(request.getPayer() != null ? request.getPayer().getAccountNumber() : null);
         return ResponseEntity.ok(gppApiFeignClient.createPayment(request));
     }
 

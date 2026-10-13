@@ -13,7 +13,7 @@ import java.util.Set;
 @Entity
 @Table(name = "pasha_accounts", indexes = {
         @Index(name = "idx_pasha_iban", columnList = "iban"),
-        @Index(name = "idx_pasha_customer_no", columnList = "customer_no")
+        @Index(name = "idx_pasha_customer_id", columnList = "customer_id")
 })
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,9 +26,6 @@ public class PashaAccountEntity extends BaseEntity {
 
     @Column(name = "account_id", unique = true, nullable = false)
     String accountId; // "ACC-1001"
-
-    @Column(name = "customer_no", nullable = false)
-    String customerNo; // "CUST-998877"
 
     @Column(name = "account_category")
     String accountCategory; // "corporate" və ya "individual"
@@ -97,6 +94,12 @@ public class PashaAccountEntity extends BaseEntity {
     BigDecimal todayOutcome;
 
     @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    CustomerEntity customer;
+
+    @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "pashaAccount", orphanRemoval = true, fetch = FetchType.LAZY)
     Set<AccountOperationEntity> accountOperations = new LinkedHashSet<>();
 

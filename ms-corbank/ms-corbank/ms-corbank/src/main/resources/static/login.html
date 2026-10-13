@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Daxil ol</title>
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/auth.css?v=1">
+</head>
+<body class="au-body">
+<div class="au">
+  <aside class="au-side">
+    <a class="au-brand" href="index.html">
+      <img src="img/logo.svg" alt="">
+      <span><b>COR Bank</b><small>Business</small></span>
+    </a>
+    <div class="au-pitch">
+      <h2>Bütün banklardakı hesablarınız bir ekranda</h2>
+      <p>Hesab qalıqlarınızı, son əməliyyatlarınızı və valyuta məzənnələrini bir yerdən izləyin, ödənişləri isə birbaşa hesabınızdan edin.</p>
+      <div class="au-banks">
+        <span class="au-bank"><img src="img/bank-pasha.svg" alt="">PASHA Bank</span>
+        <span class="au-bank"><img src="img/bank-abb.svg" alt="">ABB</span>
+      </div>
+    </div>
+    <div class="au-side-foot">COR Bank Business</div>
+  </aside>
+
+  <main class="au-main">
+    <div class="au-card">
+      <h1>Daxil ol</h1>
+      <p class="au-lead">Hesablarınızı görmək üçün email və şifrənizi daxil edin.</p>
+
+      <form class="au-form" id="loginForm" novalidate>
+        <div class="au-alert" id="alert" role="alert"></div>
+
+        <div class="au-field" data-field="email">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="ad@sirket.az" required>
+          <div class="au-error" data-error></div>
+        </div>
+
+        <div class="au-field" data-field="password">
+          <label for="password">Şifrə</label>
+          <div class="au-input-wrap">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Şifrənizi daxil edin" required>
+            <button class="au-eye" type="button" id="togglePwd" aria-label="Şifrəni göstər" aria-pressed="false"></button>
+          </div>
+          <div class="au-error" data-error></div>
+        </div>
+
+        <button class="au-submit" type="submit" id="submitBtn">Daxil ol</button>
+      </form>
+
+      <p class="au-switch">Hesabınız yoxdur? <a href="register.html" id="toRegister">Qeydiyyatdan keçin</a></p>
+      <p class="au-guest"><a href="index.html">Daxil olmadan davam et</a></p>
+    </div>
+  </main>
+</div>
+
+<script src="js/config.js?v=1791400400"></script>
+<script src="js/mock-api.js?v=1791400400"></script>
+<script src="js/common.js?v=1791400400"></script>
+<script src="js/auth-ui.js?v=1791400400"></script>
+<script src="js/login.js?v=1791400400"></script>
+</body>
+</html>

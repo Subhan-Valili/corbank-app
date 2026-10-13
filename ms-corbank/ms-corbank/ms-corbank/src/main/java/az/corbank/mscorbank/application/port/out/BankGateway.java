@@ -22,16 +22,19 @@ public interface BankGateway {
 
     Bank bank();
 
-    List<Account> findAllAccounts();
-
-    /** Empty if this bank has no such account. */
-    Optional<Account> findAccount(String accountId);
+    /** Yalnız bu PIN-in sahibi olan müştərinin hesabları. */
+    List<Account> findAllAccounts(String pin);
 
     List<Operation> findOperations(String accountId, LocalDate from, LocalDate to);
 
     /** Cheap "latest operations across accounts" view. Banks that cannot provide it return an empty list. */
-    default List<Operation> findRecentOperations(int limit) {
+    default List<Operation> findRecentOperations(String pin, int limit) {
         return List.of();
+    }
+
+    /** Bu PIN-lə bu bankda müştəri varmı (qeydiyyat yoxlaması). PIN ilə axtarışı olmayan banklar false qaytarır. */
+    default boolean customerExists(String pin) {
+        return false;
     }
 
     PaymentResult submitPayment(PaymentCommand command);

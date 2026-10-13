@@ -55,7 +55,7 @@ public class LoginService {
         RefreshToken stored = refreshTokenRepository.findById(request.refreshToken())
                 .orElseThrow(() -> {
                     log.warn("Refresh failed. Token not found or expired");
-                    return new RuntimeException("Refresh token etibarsızdır və ya vaxtı bitib");
+                    return new BadCredentialsException("Refresh token etibarsızdır və ya vaxtı bitib");
                 });
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(stored.getEmail());

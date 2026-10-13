@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Qeydiyyat</title>
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/auth.css?v=1">
+</head>
+<body class="au-body">
+<div class="au">
+  <aside class="au-side">
+    <a class="au-brand" href="index.html">
+      <img src="img/logo.svg" alt="">
+      <span><b>COR Bank</b><small>Business</small></span>
+    </a>
+    <div class="au-pitch">
+      <h2>Hesablarınızı bir dəqiqəyə bağlayın</h2>
+      <p>Bankda qeydiyyatdan keçmiş PIN kodunuzla qeydiyyatdan keçin. Hesablarınız avtomatik tapılacaq və yalnız sizə görünəcək.</p>
+      <div class="au-banks">
+        <span class="au-bank"><img src="img/bank-pasha.svg" alt="">PASHA Bank</span>
+        <span class="au-bank"><img src="img/bank-abb.svg" alt="">ABB</span>
+      </div>
+    </div>
+    <div class="au-side-foot">COR Bank Business</div>
+  </aside>
+
+  <main class="au-main">
+    <div class="au-card">
+
+      <!-- 1-ci addım: məlumatlar -->
+      <section class="au-step" id="stepForm">
+        <h1>Qeydiyyat</h1>
+        <p class="au-lead">Məlumatlarınızı daxil edin, təsdiq kodunu emailinizə göndərək.</p>
+
+        <form class="au-form" id="registerForm" novalidate>
+          <div class="au-alert" id="alert" role="alert"></div>
+
+          <div class="au-row">
+            <div class="au-field" data-field="name">
+              <label for="name">Ad</label>
+              <input id="name" name="name" type="text" autocomplete="given-name" maxlength="100" required>
+              <div class="au-error" data-error></div>
+            </div>
+            <div class="au-field" data-field="surname">
+              <label for="surname">Soyad</label>
+              <input id="surname" name="surname" type="text" autocomplete="family-name" maxlength="100" required>
+              <div class="au-error" data-error></div>
+            </div>
+          </div>
+
+          <div class="au-field" data-field="email">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="ad@sirket.az" required>
+            <div class="au-error" data-error></div>
+          </div>
+
+          <div class="au-row">
+            <div class="au-field" data-field="mobileNumber">
+              <label for="mobileNumber">Mobil nömrə</label>
+              <input id="mobileNumber" name="mobileNumber" type="tel" autocomplete="tel" placeholder="+994501112233" maxlength="20" required>
+              <div class="au-error" data-error></div>
+            </div>
+            <div class="au-field" data-field="pinCode">
+              <label for="pinCode">PIN kod</label>
+              <input id="pinCode" name="pinCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" required>
+              <div class="au-error" data-error></div>
+            </div>
+          </div>
+          <div class="au-hint" style="margin-top:-6px">PIN kodunuz bankda müştəri kimi tapılmaq üçün lazımdır. Hesablarınız ona görə sizə bağlanır.</div>
+
+          <div class="au-field" data-field="password">
+            <label for="password">Şifrə</label>
+            <div class="au-input-wrap">
+              <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="64" required>
+              <button class="au-eye" type="button" data-toggle="password" aria-label="Şifrəni göstər" aria-pressed="false"></button>
+            </div>
+            <div class="au-hint">8–64 simvol</div>
+            <div class="au-error" data-error></div>
+          </div>
+
+          <div class="au-field" data-field="password2">
+            <label for="password2">Şifrənin təkrarı</label>
+            <div class="au-input-wrap">
+              <input id="password2" name="password2" type="password" autocomplete="new-password" required>
+              <button class="au-eye" type="button" data-toggle="password2" aria-label="Şifrəni göstər" aria-pressed="false"></button>
+            </div>
+            <div class="au-error" data-error></div>
+          </div>
+
+          <button class="au-submit" type="submit" id="submitBtn">Təsdiq kodu göndər</button>
+        </form>
+
+        <p class="au-switch">Artıq hesabınız var? <a href="login.html">Daxil olun</a></p>
+        <p class="au-guest"><a href="index.html">Daxil olmadan davam et</a></p>
+      </section>
+
+      <!-- 2-ci addım: OTP -->
+      <section class="au-step" id="stepOtp" hidden>
+        <h1>Emailinizi təsdiqləyin</h1>
+        <p class="au-lead"><span class="au-sent-to" id="sentTo"></span> ünvanına 6 rəqəmli kod göndərildi. Kod 3 dəqiqə etibarlıdır.</p>
+
+        <form class="au-form" id="otpForm" novalidate>
+          <div class="au-alert" id="otpAlert" role="alert"></div>
+
+          <div class="au-field" data-field="otp">
+            <label for="otp">Təsdiq kodu</label>
+            <input class="au-otp" id="otp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" required>
+            <div class="au-error" data-error></div>
+          </div>
+
+          <div class="au-otp-meta">
+            <button class="au-link-btn" type="button" id="resendBtn" disabled>Kodu yenidən göndər</button>
+            <button class="au-link-btn" type="button" id="backBtn">Məlumatları dəyiş</button>
+          </div>
+
+          <button class="au-submit" type="submit" id="otpBtn">Təsdiqlə və daxil ol</button>
+        </form>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/config.js?v=1791400400"></script>
+<script src="js/mock-api.js?v=1791400400"></script>
+<script src="js/common.js?v=1791400400"></script>
+<script src="js/auth-ui.js?v=1791400400"></script>
+<script src="js/register.js?v=1791400400"></script>
+</body>
+</html>

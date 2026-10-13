@@ -160,10 +160,11 @@
 .mh-table thead th:first-child { border-radius: 10px 0 0 10px; }
 .mh-table thead th:last-child  { border-radius: 0 10px 10px 0; }
 
-.mh-table th:nth-child(1) { width: 15%; }
-.mh-table th:nth-child(2) { width: 44%; }
-.mh-table th:nth-child(3) { width: 21%; }
-.mh-table th:nth-child(4) { width: 20%; }
+.mh-table th:nth-child(1) { width: 13%; }
+.mh-table th:nth-child(2) { width: 34%; }
+.mh-table th:nth-child(3) { width: 17%; }
+.mh-table th:nth-child(4) { width: 19%; }
+.mh-table th:nth-child(5) { width: 17%; }
 
 .mh-table tbody td {
   padding: 13px 14px;

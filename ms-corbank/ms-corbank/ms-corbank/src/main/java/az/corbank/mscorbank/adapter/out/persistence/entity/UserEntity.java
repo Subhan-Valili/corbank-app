@@ -41,9 +41,15 @@ public class UserEntity extends BaseEntity implements UserDetails {
     @Column(name = "mobile_number", nullable = false, unique = true, length = 20)
     String mobileNumber;
 
+    /** HMAC-SHA256(PIN) — unikallıq yoxlaması üçün. */
     @ToString.Exclude
-    @Column(name = "pin_code", nullable = false, unique = true, length = 100)
-    String pinCode;
+    @Column(name = "pin_hash", unique = true, length = 64)
+    String pinHash;
+
+    /** AES-GCM ilə şifrələnmiş PIN — bank sorğuları üçün geri açılır. */
+    @ToString.Exclude
+    @Column(name = "pin_encrypted", length = 255)
+    String pinEncrypted;
 
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER)

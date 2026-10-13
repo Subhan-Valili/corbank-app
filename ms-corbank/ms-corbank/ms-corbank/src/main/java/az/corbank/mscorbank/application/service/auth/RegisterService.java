@@ -6,6 +6,12 @@ import az.corbank.mscorbank.adapter.out.persistence.entity.UserEntity;
 import az.corbank.mscorbank.adapter.out.persistence.repository.jpa.RoleRepository;
 import az.corbank.mscorbank.adapter.out.persistence.repository.jpa.UserRepository;
 
+import az.corbank.mscorbank.adapter.out.security.PinProtector;
+import az.corbank.mscorbank.application.exception.PinNotFoundException;
+import az.corbank.mscorbank.application.exception.RegistrationException;
+import az.corbank.mscorbank.application.exception.ServiceUnavailableException;
+import az.corbank.mscorbank.application.port.out.BankUnavailableException;
+import az.corbank.mscorbank.application.port.out.CustomerRegistryPort;
 import az.corbank.mscorbank.application.port.out.EmailSenderPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +46,18 @@ public class RegisterService {
     private final ObjectMapper objectMapper;
     private final EmailSenderPort emailSender;
     private final PasswordEncoder passwordEncoder;
+    private final PinProtector pinProtector;
+    private final CustomerRegistryPort customerRegistry;
 
     public RegisterResponse preRegisterUser(RegisterRequest request) {
         String email = normalize(request.email());
         log.info("Registration attempt: {}", mask(email));
 
-        assertNotRegistered(email, request.mobileNumber());
+        String pin = pinProtector.normalize(request.pinCode());
+        String pinHash = pinProtector.hash(pin);
+
+        assertNotRegistered(email, request.mobileNumber(), pinHash);
+        assertPinKnownToBank(pin);
 
         PendingRegistration pending = new PendingRegistration(
                 request.name().trim(),
@@ -53,7 +65,8 @@ public class RegisterService {
                 email,
                 passwordEncoder.encode(request.password()),
                 request.mobileNumber(),
-                passwordEncoder.encode(request.pinCode()));
+                pinHash,
+                pinProtector.encrypt(pin));
 
         String sessionId = UUID.randomUUID().toString();
         String otp = generateOtp();
@@ -77,7 +90,7 @@ public class RegisterService {
         String cachedOtp = redis.opsForValue().get(otpKey(sessionId));
         if (cachedOtp == null) {
             log.warn("OTP expired [session {}]", sessionId);
-            throw new RuntimeException("OTP-nin vaxtı bitib");
+            throw new RegistrationException("OTP-nin vaxtı bitib");
         }
 
         if (!MessageDigest.isEqual(
@@ -86,12 +99,12 @@ public class RegisterService {
             handleWrongOtp(sessionId);
         }
 
-        assertNotRegistered(pending.email(), pending.mobileNumber());
+        assertNotRegistered(pending.email(), pending.mobileNumber(), pending.pinHash());
 
         RoleEntity role = roleRepository.findByName(DEFAULT_ROLE)
                 .orElseThrow(() -> {
                     log.error("{} DB-də tapılmadı!", DEFAULT_ROLE);
-                    return new RuntimeException("Rol tapılmadı: " + DEFAULT_ROLE);
+                    return new RegistrationException("Rol tapılmadı: " + DEFAULT_ROLE);
                 });
 
         UserEntity user = UserEntity.builder()
@@ -99,15 +112,16 @@ public class RegisterService {
                 .surname(pending.surname())
                 .email(pending.email())
                 .password(pending.passwordHash())
-                .mobileNumber(pending.mobileNumber())
-                .pinCode(pending.pinCode())
+                .mobileNumber("+994" + pending.mobileNumber())
+                .pinHash(pending.pinHash())
+                .pinEncrypted(pending.pinEncrypted())
                 .roles(new HashSet<>(Set.of(role)))
                 .build();
 
         try {
             userRepository.saveAndFlush(user);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Bu email və ya mobil nömrə artıq qeydiyyatdadır", e);
+            throw new RegistrationException("Bu email, mobil nömrə və ya PIN artıq qeydiyyatdadır", e);
         }
 
         clearSession(sessionId);
@@ -126,7 +140,7 @@ public class RegisterService {
 
         if (Boolean.TRUE.equals(redis.hasKey(cooldownKey(sessionId)))) {
             log.warn("Resend blocked by cooldown [session {}]", sessionId);
-            throw new RuntimeException("Yeni OTP üçün bir az gözləyin");
+            throw new RegistrationException("Yeni OTP üçün bir az gözləyin");
         }
 
         String otp = generateOtp();
@@ -149,18 +163,36 @@ public class RegisterService {
         if (remaining <= 0) {
             redis.delete(List.of(otpKey(sessionId), attemptKey(sessionId)));
             log.warn("Max OTP attempts exceeded [session {}]", sessionId);
-            throw new RuntimeException("Yanlış cəhd limiti aşıldı, yeni OTP istəyin");
+            throw new RegistrationException("Yanlış cəhd limiti aşıldı, yeni OTP istəyin");
         }
         log.warn("Invalid OTP [session {}], remaining {}", sessionId, remaining);
-        throw new RuntimeException("OTP yanlışdır. Qalan cəhd: " + remaining);
+        throw new RegistrationException("OTP yanlışdır. Qalan cəhd: " + remaining);
     }
 
-    private void assertNotRegistered(String email, String mobileNumber) {
+    /** PIN-in real bank müştərisinə aid olduğunu ms-pasha (və gələcək banklar) vasitəsilə yoxlayır. */
+    private void assertPinKnownToBank(String pin) {
+        boolean exists;
+        try {
+            exists = customerRegistry.existsByPin(pin);
+        } catch (BankUnavailableException e) {
+            log.warn("PIN yoxlanıla bilmədi, bank əlçatmazdır: {}", e.getMessage());
+            throw new ServiceUnavailableException("Bank sistemi hazırda əlçatmazdır, bir az sonra yenidən cəhd edin", e);
+        }
+        if (!exists) {
+            log.warn("Registration rejected: PIN not found in any bank");
+            throw new PinNotFoundException("Bu PIN ilə bankda müştəri tapılmadı");
+        }
+    }
+
+    private void assertNotRegistered(String email, String mobileNumber, String pinHash) {
         if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Bu email artıq qeydiyyatdadır");
+            throw new RegistrationException("Bu email artıq qeydiyyatdadır");
         }
         if (userRepository.existsByMobileNumber(mobileNumber)) {
-            throw new RuntimeException("Bu mobil nömrə artıq qeydiyyatdadır");
+            throw new RegistrationException("Bu mobil nömrə artıq qeydiyyatdadır");
+        }
+        if (userRepository.existsByPinHash(pinHash)) {
+            throw new RegistrationException("Bu PIN artıq qeydiyyatdadır");
         }
     }
 
@@ -168,12 +200,12 @@ public class RegisterService {
         String json = redis.opsForValue().get(sessionKey(sessionId));
         if (json == null) {
             log.warn("Registration session expired [session {}]", sessionId);
-            throw new RuntimeException("Qeydiyyat sessiyasının vaxtı bitib");
+            throw new RegistrationException("Qeydiyyat sessiyasının vaxtı bitib");
         }
         try {
             return objectMapper.readValue(json, PendingRegistration.class);
         } catch (Exception e) {
-            throw new RuntimeException("Qeydiyyat sessiyası oxunmadı", e);
+            throw new RegistrationException("Qeydiyyat sessiyası oxunmadı", e);
         }
     }
 

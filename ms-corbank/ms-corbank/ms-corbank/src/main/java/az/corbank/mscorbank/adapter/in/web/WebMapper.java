@@ -52,6 +52,8 @@ final class WebMapper {
                 .currency(op.currency())
                 .direction(op.direction() == OperationDirection.IN ? "in" : "out")
                 .status("completed")
+                .accountId(op.accountId())
+                .bank(op.bank() != null ? op.bank().name() : null)
                 .build();
     }
 

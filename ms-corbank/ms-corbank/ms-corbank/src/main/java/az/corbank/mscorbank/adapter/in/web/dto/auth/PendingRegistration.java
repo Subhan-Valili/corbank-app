@@ -6,5 +6,6 @@ public record PendingRegistration(
         String email,
         String passwordHash,
         String mobileNumber,
-        String pinCode
+        String pinHash,
+        String pinEncrypted
 ) {}

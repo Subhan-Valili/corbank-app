@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COR Bank Business — Əsas səhifə</title>
+<title>COR Bank Business</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/shell.css?v=2">
-<link rel="stylesheet" href="css/dashboard.css?v=2">
+<link rel="stylesheet" href="css/dashboard.css?v=4">
 </head>
 <body>
 <div class="app" id="app">
@@ -34,13 +34,15 @@
 
       <div class="db-columns">
         <div class="db-col">
-          <!-- Digər hesablar və layihələr -->
+          <!-- Digər hesablar və layihələr ("Bütün banklar" rejimində gizlənir) -->
+          <div class="db-collapse"><div class="db-collapse-inner">
           <section class="db-panel">
             <div class="db-panel-head">
               <h2>Digər hesablar və layihələr</h2>
             </div>
             <div class="db-projects" id="projectsGrid"></div>
           </section>
+          </div></div>
 
           <!-- Son əməliyyatlar -->
           <section class="db-panel">
@@ -51,7 +53,7 @@
             <div class="db-table-wrap">
               <table class="db-table">
                 <thead>
-                  <tr><th>Tarix</th><th>Təsvir</th><th>Məbləğ</th><th>Status</th></tr>
+                  <tr><th>Tarix</th><th>Təsvir</th><th>Bank</th><th>Məbləğ</th><th>Status</th></tr>
                 </thead>
                 <tbody id="opsBody"></tbody>
               </table>
@@ -69,7 +71,8 @@
             <div class="db-banks" id="banksList"></div>
           </section>
 
-          <!-- Valyuta məzənnələri -->
+          <!-- Valyuta məzənnələri ("Bütün banklar" rejimində gizlənir) -->
+          <div class="db-collapse"><div class="db-collapse-inner">
           <section class="db-panel">
             <div class="db-panel-head">
               <h2>Valyuta məzənnələri</h2>
@@ -78,25 +81,29 @@
             <div class="db-fx-head"><span>Valyuta</span><span>Alış</span><span>Satış</span></div>
             <div id="fxList"></div>
           </section>
+          </div></div>
         </div>
       </div>
 
-      <!-- Sifarişlər -->
+      <!-- Sifarişlər ("Bütün banklar" rejimində gizlənir) -->
+      <div class="db-collapse db-orders-wrap"><div class="db-collapse-inner">
       <section class="db-panel db-orders-panel">
         <div class="db-panel-head">
           <h2>Sifarişlər</h2>
         </div>
         <div class="db-orders" id="ordersGrid"></div>
       </section>
+      </div></div>
 
       <div class="db-demo-note">Demo məlumatlar</div>
     </main>
   </div>
 </div>
 
-<script src="js/config.js?v=1791400000"></script>
-<script src="js/common.js?v=1791400000"></script>
-<script src="js/orders.js?v=1791400000"></script>
-<script src="js/dashboard.js?v=1791400000"></script>
+<script src="js/config.js?v=1791400400"></script>
+<script src="js/mock-api.js?v=1791400400"></script>
+<script src="js/common.js?v=1791400400"></script>
+<script src="js/orders.js?v=1791400400"></script>
+<script src="js/dashboard.js?v=1791400400"></script>
 </body>
 </html>

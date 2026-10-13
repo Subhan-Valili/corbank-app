@@ -11,7 +11,7 @@ databaseChangeLog:
               - column: { name: updated_at, type: TIMESTAMP }
 
               - column: { name: account_id, type: VARCHAR(255), constraints: { nullable: false, unique: true } }
-              - column: { name: customer_no, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: customer_id, type: BIGINT, constraints: { nullable: false } }
               - column: { name: account_category, type: VARCHAR(255) }
               - column: { name: account_no, type: VARCHAR(255) }
               - column: { name: account_open_date, type: DATE }
@@ -22,9 +22,9 @@ databaseChangeLog:
               - column: { name: blocked_amount, type: "DECIMAL(15,2)" }
               - column: { name: currency, type: VARCHAR(3), constraints: { nullable: false } }
               - column: { name: iban, type: VARCHAR(255), constraints: { nullable: false, unique: true } }
-              - column: { name: bank_code, type: VARCHAR(255) , constraints: { nullable: false } }
-              - column: { name: branch_code, type: VARCHAR(255) , constraints: { nullable: false } }
-              - column: { name: branch_name, type: VARCHAR(255) , constraints: { nullable: false } }
+              - column: { name: bank_code, type: VARCHAR(255) }
+              - column: { name: branch_code, type: VARCHAR(255) }
+              - column: { name: branch_name, type: VARCHAR(255) }
               - column: { name: tin, type: VARCHAR(255) }
               - column: { name: credit_is_allowed, type: BOOLEAN }
               - column: { name: debit_is_allowed, type: BOOLEAN }
@@ -40,9 +40,3 @@ databaseChangeLog:
             tableName: pasha_accounts
             columns:
               - column: { name: iban }
-
-        - createIndex:
-            indexName: idx_pasha_customer_no
-            tableName: pasha_accounts
-            columns:
-              - column: { name: customer_no }

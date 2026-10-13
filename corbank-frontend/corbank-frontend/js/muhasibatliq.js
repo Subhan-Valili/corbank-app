@@ -27,8 +27,8 @@ const TOOLS = [
   { icon: MhIcons.receipt,    label: 'Elektron Qaimə Faktura' },
   { icon: MhIcons.calculator, label: 'Mühasibatlıq proqramı' },
   { icon: MhIcons.transfer,   label: 'Debitor/ kreditor borcları' },
-  { icon: MhIcons.tax,        label: 'Vergi və büdcə ödənişləri' },
-  { icon: MhIcons.robot,      label: 'Aİ Vergi Agenti' },
+  { icon: MhIcons.tax,        label: 'Vergi və büdcə ödənişləri', href: 'vergi.html' },
+  { icon: MhIcons.robot,      label: 'Aİ Vergi Agenti', href: 'ai-vergi.html' },
   { icon: MhIcons.sparkles,   label: 'Aİ Mühasib' },
 ];
 
@@ -40,6 +40,8 @@ document.getElementById('toolsGrid').innerHTML = TOOLS.map((t, i) => `
 
 document.querySelectorAll('.mh-tool').forEach(btn => {
   btn.addEventListener('click', () => {
+    const t = TOOLS[Number(btn.dataset.idx)];
+    if (t.href) { location.href = t.href; return; }
     showToast(`“${TOOLS[Number(btn.dataset.idx)].label}” bölməsi tezliklə əlavə olunacaq`, 'info');
   });
 });
@@ -85,6 +87,7 @@ function opRowHtml(op) {
         </div>
       </div>
     </td>
+    <td>${opBankHtml(op.bank)}</td>
     <td class="amount ${isIn ? 'in' : 'out'}">${isIn ? '+' : '−'}${Fmt.money(op.amount, op.currency)}</td>
     <td><span class="status-chip ${statusClass(op.status)}"><span class="dot"></span>${statusLabel(op.status)}</span></td>
   </tr>`;
@@ -139,7 +142,7 @@ async function load() {
     );
 
     allOps = results.flatMap((r, i) =>
-      (r.operations || []).map(op => ({ ...op, accountId: accounts[i].id }))
+      (r.operations || []).map(op => ({ ...op, accountId: accounts[i].id, bank: accounts[i].bank, currency: accounts[i].currency }))
     );
     // newest first; Array.sort is stable so same-day rows keep account order (AZN, USD, EUR)
     allOps.sort((a, b) => String(b.date).localeCompare(String(a.date)));

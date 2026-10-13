@@ -39,16 +39,13 @@ class PashaBankAdapter implements BankGateway {
     private final PashaAccountFeignClient accountClient;
     private final AccountOperationFeignClient operationClient;
     private final BulkControllerFeignClient bulkClient;
-    private final String customerNo;
 
     PashaBankAdapter(PashaAccountFeignClient accountClient,
                      AccountOperationFeignClient operationClient,
-                     BulkControllerFeignClient bulkClient,
-                     @Value("${corbank.customer-no}") String customerNo) {
+                     BulkControllerFeignClient bulkClient) {
         this.accountClient = accountClient;
         this.operationClient = operationClient;
         this.bulkClient = bulkClient;
-        this.customerNo = customerNo;
     }
 
     @Override
@@ -57,21 +54,24 @@ class PashaBankAdapter implements BankGateway {
     }
 
     @Override
-    public List<Account> findAllAccounts() {
+    public List<Account> findAllAccounts(String pin) {
         try {
-            return accountClient.findAllAccountsByCustomerNo(customerNo).stream().map(this::toAccount).toList();
+            return accountClient.findAllAccountsByPin(pin).stream().map(this::toAccount).toList();
+        } catch (FeignException.NotFound e) {
+            return List.of();
         } catch (FeignException e) {
             throw new BankUnavailableException(Bank.PASHA, e.getMessage(), e);
         }
     }
 
+    /** PIN-in ms-pasha-da hesabı varsa müştəri mövcuddur. 400/404 "tapılmadı" sayılır, qalan xətalar "əlçatmaz". */
     @Override
-    public Optional<Account> findAccount(String accountId) {
+    public boolean customerExists(String pin) {
         try {
-            return Optional.of(toAccount(accountClient.findAccountByAccountId(accountId)));
-        } catch (FeignException.NotFound e) {
-            return Optional.empty();
+            List<PashaAccountResponseDto> accounts = accountClient.findAllAccountsByPin(pin);
+            return accounts != null && !accounts.isEmpty();
         } catch (FeignException e) {
+            if (e.status() == 400 || e.status() == 404) return false;
             throw new BankUnavailableException(Bank.PASHA, e.getMessage(), e);
         }
     }
@@ -79,7 +79,7 @@ class PashaBankAdapter implements BankGateway {
     @Override
     public List<Operation> findOperations(String accountId, LocalDate from, LocalDate to) {
         try {
-            return operationClient.getOperations(accountId, from, to).data().stream().map(this::toOperation).toList();
+            return operationClient.getOperations(accountId, from, to).data().stream().map(o -> toOperation(o, accountId)).toList();
         } catch (FeignException e) {
             throw new BankUnavailableException(Bank.PASHA, e.getMessage(), e);
         }
@@ -136,7 +136,7 @@ class PashaBankAdapter implements BankGateway {
         };
     }
 
-    private Operation toOperation(AccountOperationDto op) {
+    private Operation toOperation(AccountOperationDto op, String accountId) {
         boolean credit = op.type() == OperationType.CREDIT;
         return new Operation(
                 op.id(),
@@ -146,6 +146,8 @@ class PashaBankAdapter implements BankGateway {
                 op.amount() != null ? op.amount().value() : BigDecimal.ZERO,
                 op.amount() != null ? op.amount().currencyCode() : null,
                 credit ? OperationDirection.IN : OperationDirection.OUT,
-                OperationStatus.COMPLETED);
+                OperationStatus.COMPLETED,
+                accountId,
+                Bank.PASHA);
     }
 }

@@ -57,22 +57,167 @@ const Company = {
   }
 };
 
+// ---------- Auth (JWT) ----------
+// Giriş/qeydiyyat səhifələri: login.html, register.html. Token-lər brauzerin localStorage-ində saxlanılır.
+// Guest (login olmayan) istifadəçi yalnız PUBLIC_PAGES səhifələrini görür; qalanları login-ə yönləndirir.
+class ApiError extends Error {
+  constructor(message, status, serverMessage) {
+    super(message);
+    this.status = status;
+    this.serverMessage = serverMessage || '';
+  }
+}
+
+const Auth = {
+  K_ACCESS: 'corbank_access',
+  K_REFRESH: 'corbank_refresh',
+  K_USER: 'corbank_user',
+  PUBLIC_PAGES: ['index.html', 'tariflar.html', 'destek.html', 'login.html', 'register.html'],
+  redirecting: false,
+  _refreshing: null,
+
+  _get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  _set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* brauzer icazə vermir */ } },
+  _del(k) { try { localStorage.removeItem(k); } catch (e) { /* brauzer icazə vermir */ } },
+
+  token() { return this._get(this.K_ACCESS); },
+  refreshToken() { return this._get(this.K_REFRESH); },
+  isLoggedIn() { return !!(this.token() || this.refreshToken()); },
+  page() { return location.pathname.split('/').pop() || 'index.html'; },
+
+  user() {
+    try { return JSON.parse(this._get(this.K_USER) || 'null'); } catch (e) { return null; }
+  },
+  fullName() {
+    const u = this.user();
+    return u ? `${u.name || ''} ${u.surname || ''}`.trim() : '';
+  },
+
+  setSession(tokens) {
+    this._set(this.K_ACCESS, tokens.accessToken);
+    this._set(this.K_REFRESH, tokens.refreshToken);
+  },
+  clear() {
+    this._del(this.K_ACCESS); this._del(this.K_REFRESH); this._del(this.K_USER);
+    this._del('corbank_prefs'); this._del('corbank_bank');
+  },
+
+  loginUrl(next) { return 'login.html' + (next ? '?next=' + encodeURIComponent(next) : ''); },
+
+  requireLogin() {
+    if (this.isLoggedIn()) return;
+    this.redirecting = true;
+    location.replace(this.loginUrl(this.page() + location.search));
+  },
+  // Sessiya bitib (refresh də keçmir) — təmizlə və login-ə qaytar
+  expire() {
+    this.clear();
+    this.redirecting = true;
+    location.replace(this.loginUrl(this.page() + location.search));
+  },
+  logout() {
+    this.clear();
+    location.href = 'login.html';
+  },
+
+  // Auth endpoint-ləri (token tələb etmir). Uğursuzluqda serverin mesajı ilə ApiError atır.
+  async call(path, body) {
+    let res;
+    try {
+      res = await fetch(API_BASE_URL + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined
+      });
+    } catch (e) {
+      throw new ApiError('Serverə qoşulmaq mümkün olmadı. Bir az sonra yenidən cəhd edin.', 0);
+    }
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* boş cavab (201/204) */ }
+    if (!res.ok) {
+      throw new ApiError((data && data.message) || Auth.fallbackMessage(res.status, path), res.status, data && data.message);
+    }
+    return data;
+  },
+  fallbackMessage(status, path) {
+    if (status === 401) return /\/login$/.test(path || '') ? 'Email və ya şifrə yanlışdır' : 'Sessiya etibarsızdır, yenidən cəhd edin';
+    if (status === 503) return 'Sistem müvəqqəti əlçatmazdır, bir az sonra yenidən cəhd edin';
+    if (status === 429) return 'Çox sayda cəhd oldu, bir az gözləyin';
+    if (status >= 500) return 'Serverdə xəta baş verdi. Bir az sonra yenidən cəhd edin.';
+    return 'Sorğu uğursuz oldu';
+  },
+
+  async login(email, password) {
+    const tokens = await this.call('/v1/auth/login', { email, password });
+    this.clear();
+    this.setSession(tokens);
+    await this.loadProfile();
+  },
+  async loadProfile() {
+    try {
+      const res = await Api._fetch('/me');
+      if (res.ok) this._set(this.K_USER, JSON.stringify(await res.json()));
+    } catch (e) { /* profil olmasa da giriş işləyir */ }
+  },
+
+  // Eyni anda bir neçə sorğu 401 alsa, refresh yalnız bir dəfə göndərilir
+  refresh() {
+    if (this._refreshing) return this._refreshing;
+    const rt = this.refreshToken();
+    if (!rt) return Promise.resolve(false);
+    this._refreshing = this.call('/v1/auth/refresh', { refreshToken: rt })
+      .then(tokens => { this.setSession(tokens); return true; })
+      .catch(() => false)
+      .finally(() => { this._refreshing = null; });
+    return this._refreshing;
+  }
+};
+
+if (!Auth.PUBLIC_PAGES.includes(Auth.page())) Auth.requireLogin();
+
 const Api = {
   base: API_BASE_URL,
+  // Bearer token ilə sorğu; 401 olsa bir dəfə refresh edib təkrarlayır, olmasa login-ə qaytarır.
+  async _fetch(path, opts = {}, auth = true) {
+    if (Auth.redirecting) return new Promise(() => {});
+    const send = () => {
+      const headers = { ...(opts.headers || {}) };
+      if (auth && Auth.token()) headers['Authorization'] = 'Bearer ' + Auth.token();
+      return fetch(this.base + path, { ...opts, headers });
+    };
+    let res;
+    try { res = await send(); } catch (e) { throw new ApiError('Serverə qoşulmaq mümkün olmadı', 0); }
+    if (res.status === 401 && auth) {
+      if (Auth.refreshToken() && await Auth.refresh()) res = await send();
+      if (res.status === 401) { Auth.expire(); return new Promise(() => {}); }
+    }
+    return res;
+  },
+  async _fail(path, res) {
+    let msg = '';
+    try { msg = (await res.json()).message || ''; } catch (e) { /* JSON deyil */ }
+    return new ApiError('Request failed: ' + path + ' (HTTP ' + res.status + ')', res.status, msg);
+  },
   async get(path) {
-    const res = await fetch(this.base + path);
-    if (!res.ok) throw new Error('Request failed: ' + path + ' (HTTP ' + res.status + ')');
+    const res = await this._fetch(path);
+    if (!res.ok) throw await this._fail(path, res);
     const json = await res.json();
     const c = Company.current();
     return (c.factor !== 1 && /^\/(dashboard|accounts|projects)/.test(path)) ? Company.scale(json, c.factor) : json;
   },
+  // Login tələb etməyən endpoint-lər (guest): /public/...
+  async publicGet(path) {
+    const res = await this._fetch(path, {}, false);
+    if (!res.ok) throw await this._fail(path, res);
+    return res.json();
+  },
   async post(path, body) {
-    const res = await fetch(this.base + path, {
+    const res = await this._fetch(path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(Company.toBackend(path, body))
     });
-    if (!res.ok) throw new Error('Request failed: ' + path + ' (HTTP ' + res.status + ')');
+    if (!res.ok) throw await this._fail(path, res);
     return res.json();
   }
 };
@@ -136,6 +281,7 @@ const Icons = {
   settings: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>`,
   headset: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>`,
   logout: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>`,
+  login: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>`,
   chevron: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>`,
   swap: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h13l-4-4"/><path d="M17 17H4l4 4"/></svg>`,
   send: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>`,
@@ -203,7 +349,8 @@ const BankSel = {
   KEY: 'corbank_bank',
   get() { try { return localStorage.getItem(this.KEY) || ''; } catch (e) { return ''; } },
   set(v) { try { v ? localStorage.setItem(this.KEY, v) : localStorage.removeItem(this.KEY); } catch (e) { /* storage bağlıdır */ } },
-  query() { const v = this.get(); return v ? '?bank=' + encodeURIComponent(v) : ''; }
+  ALL: 'ALL',   // "Bütün banklar" — konsolidə görünüş (API-yə bank filtri göndərilmir)
+  query() { const v = this.get(); return v && v !== this.ALL ? '?bank=' + encodeURIComponent(v) : ''; }
 };
 
 function bankTitle(bank) {
@@ -212,6 +359,11 @@ function bankTitle(bank) {
 function accountLabel(acc) {
   const b = bankTitle(acc && acc.bank);
   return b ? `${acc.name} · ${b}` : acc.name;
+}
+// Əməliyyat cədvəllərində "Bank" xanası: loqo + bankın adı
+function opBankHtml(bank) {
+  const name = bankTitle(bank) || String(bank || '—');
+  return `<span class="op-bank">${bankLogoImg(name, 22)}<span>${escHtml(name)}</span></span>`;
 }
 // Öz hesablar arası köçürmə / mübadilə yalnız eyni bankın daxilində mümkündür (hər bank öz ledger-ini yeniləyir).
 function sameBank(a, b) {
@@ -295,7 +447,9 @@ function renderSidebar(activeHref) {
     { href: 'parametrler.html', icon: Icons.settings, label: 'Parametrlər' },
     { href: 'destek.html', icon: Icons.headset, label: 'Əlaqə və dəstək' },
   ];
-  const nav = items.map(it => `
+  const guest = !Auth.isLoggedIn();
+  const visible = guest ? items.filter(it => Auth.PUBLIC_PAGES.includes(it.href)) : items;
+  const nav = visible.map(it => `
     <a class="nav-item ${it.href === activeHref ? 'active' : ''}" href="${it.href}">
       ${it.icon}<span>${it.label}</span>
     </a>`).join('');
@@ -311,7 +465,9 @@ function renderSidebar(activeHref) {
     </div>
     <nav class="nav">${nav}</nav>
     <div class="nav-footer">
-      <a class="nav-item" href="index.html">${Icons.logout}<span>Çıxış</span></a>
+      ${guest
+        ? `<a class="nav-item" href="login.html">${Icons.login}<span>Daxil ol</span></a>`
+        : `<a class="nav-item" href="login.html" data-logout>${Icons.logout}<span>Çıxış</span></a>`}
     </div>
   </aside>`;
 }
@@ -326,6 +482,13 @@ function companyMenuHtml() {
 }
 
 function renderTopbar() {
+  if (!Auth.isLoggedIn()) {
+    return `
+  <header class="topbar">
+    <a class="topbar-auth btn-ghost" href="login.html">Daxil ol</a>
+    <a class="topbar-auth btn-primary" href="register.html">Qeydiyyat</a>
+  </header>`;
+  }
   const prefs = Prefs.get();
   const cur = Company.current();
   return `
@@ -359,7 +522,15 @@ function initialsFrom(name) {
 // localStorage-da saxlanılır ki, "brauzer icazə verdikdə saxlanılır" sözü doğru olsun.
 const PREFS_KEY = 'corbank_prefs';
 const Prefs = {
-  defaults: { name: 'Farid Abbasovdsa', email: 'farid@alfa.azdsa', hideAmounts: false, notifDot: true },
+  get defaults() {
+    const u = Auth.user();
+    return {
+      name: Auth.fullName() || 'İstifadəçi',
+      email: (u && u.email) || '',
+      hideAmounts: false,
+      notifDot: true
+    };
+  },
   get() {
     try {
       const raw = localStorage.getItem(PREFS_KEY);
@@ -421,13 +592,13 @@ function openProfileModal() {
   const p = Prefs.get();
   openModal({
     title: 'İstifadəçi profili',
-    subtitle: 'COR Bank · Demo məlumatlar',
+    subtitle: 'COR Bank',
     bodyHtml: `
       <div class="profile-box">
         <div class="profile-avatar">${escHtml(initialsFrom(p.name))}</div>
         <div class="profile-name">${escHtml(p.name)}</div>
         <div class="profile-email">${escHtml(p.email)}</div>
-        <div class="profile-role">${escHtml(Company.current().name)} · Demo administrator</div>
+        <div class="profile-role">${escHtml(Company.current().name)} · İstifadəçi</div>
       </div>`,
     footerHtml: `<button class="btn-primary btn-block" id="profileEditBtn" type="button">Profili redaktə et</button>`
   });
@@ -435,6 +606,7 @@ function openProfileModal() {
 }
 
 document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-logout]')) { e.preventDefault(); Auth.logout(); return; }
   if (e.target.closest('.topbar-company')) { toggleCompanyMenu(); return; }
   const item = e.target.closest('.company-item');
   if (item) { selectCompany(item.dataset.company); return; }

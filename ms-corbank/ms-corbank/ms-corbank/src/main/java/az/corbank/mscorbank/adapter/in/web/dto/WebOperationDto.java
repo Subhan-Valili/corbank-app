@@ -13,6 +13,8 @@ public record WebOperationDto(
         BigDecimal amount,
         String currency,
         String direction,     // "in" | "out"
-        String status         // "completed" | "pending" | "rejected"
+        String status,        // "completed" | "pending" | "rejected"
+        String accountId,     // Account.id — frontend hesabı tapıb IBAN/ad göstərir
+        String bank           // "PASHA" | "ABB"
 ) {
 }

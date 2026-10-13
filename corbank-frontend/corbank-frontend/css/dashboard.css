@@ -100,7 +100,8 @@
   margin-top: 18px;
   align-items: start;
 }
-.db-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.db-col { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.db-col > * + * { margin-top: 18px; }
 
 /* ---------- Layihələr ---------- */
 .db-project .db-chev { width: 28px; height: 28px; }
@@ -134,7 +135,7 @@
 
 /* ---------- Cədvəl (Son əməliyyatlar) ---------- */
 .db-table-wrap { overflow-x: auto; }
-.db-table { width: 100%; min-width: 620px; border-collapse: separate; border-spacing: 0; }
+.db-table { width: 100%; min-width: 680px; border-collapse: separate; border-spacing: 0; }
 .db-table thead th {
   background: #f2f5fb;
   padding: 12px 14px;
@@ -146,10 +147,11 @@
 }
 .db-table thead th:first-child { border-radius: 10px 0 0 10px; }
 .db-table thead th:last-child  { border-radius: 0 10px 10px 0; }
-.db-table th:nth-child(1) { width: 14%; }
-.db-table th:nth-child(2) { width: 44%; }
-.db-table th:nth-child(3) { width: 22%; }
+.db-table th:nth-child(1) { width: 12%; }
+.db-table th:nth-child(2) { width: 31%; }
+.db-table th:nth-child(3) { width: 17%; }
 .db-table th:nth-child(4) { width: 20%; }
+.db-table th:nth-child(5) { width: 20%; }
 
 .db-table tbody td {
   padding: 12px 14px;
@@ -207,7 +209,7 @@
 .db-fx-cur { display: flex; align-items: center; gap: 12px; }
 
 /* ---------- Sifarişlər ---------- */
-.db-orders-panel { margin-top: 18px; }
+.db-orders-wrap { margin-top: 18px; }
 .db-orders {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -293,3 +295,98 @@
 
 .db-bank-off { opacity: .55; cursor: default; }
 .db-bank-off .db-bank-count { font-style: italic; }
+
+/* =====================================================================
+   "Bütün banklar" rejimi — yumşaq keçidlər
+   ===================================================================== */
+/* Gizlənən bölmələr: hündürlük (grid 1fr → 0fr), şəffaflıq və aralıq birlikdə animasiya olunur */
+.db-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows .45s cubic-bezier(.4, 0, .2, 1), opacity .3s ease, margin-top .45s cubic-bezier(.4, 0, .2, 1);
+}
+.db-collapse-inner { min-height: 0; overflow: hidden; }
+.db-collapse-inner > .db-panel { transform: translateY(0); transition: transform .45s cubic-bezier(.4, 0, .2, 1); }
+.db-mode-all .db-collapse { grid-template-rows: 0fr; opacity: 0; margin-top: 0 !important; pointer-events: none; }
+.db-mode-all .db-collapse-inner > .db-panel { transform: translateY(-8px); }
+
+/* Məzmun dəyişəndə (hesablar, əməliyyatlar) solub yenidən görünmə */
+.db-swap { transition: opacity .18s ease, transform .18s ease; }
+.db-swap.db-fading { opacity: 0; transform: translateY(6px); }
+
+/* Valyuta üzrə cəm kartı */
+.db-account-sum { cursor: default; }
+.db-account-sum:hover { transform: none; box-shadow: none; }
+.db-sum-count { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.db-sum-rows { border-top: 1px solid var(--border); margin-top: 2px; padding-top: 6px; display: flex; flex-direction: column; }
+.db-sum-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 7px 8px; margin: 0 -8px; border-radius: 8px; color: var(--text); font-size: 13.5px;
+  transition: background .15s ease;
+}
+.db-sum-row:hover { background: var(--accent-light); }
+.db-sum-bank { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.db-sum-bank .bank-img { width: 22px; height: 22px; border-radius: 6px; flex: none; }
+.db-sum-amount { font-weight: 600; white-space: nowrap; }
+.db-sum-share { height: 4px; border-radius: 4px; background: var(--accent-light); overflow: hidden; margin: 2px 0 4px; }
+.db-sum-share span { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+
+/* "Bütün banklar" sətri */
+.db-allbanks-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-light); color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-collapse, .db-collapse-inner > .db-panel, .db-swap { transition: none; }
+}
+/* Sol sütunda yuxarıdakı bölmə gizlənəndə "Son əməliyyatlar" yuxarı sürüşür */
+.db-col > * { transition: margin-top .45s cubic-bezier(.4, 0, .2, 1); }
+.db-mode-all .db-col > .db-collapse:first-child + * { margin-top: 0; }
+
+/* Son əməliyyatlar: sətrə klik → ətraflı məlumat */
+.db-table .status-chip.pending  { background: #fdf5e0; }
+.db-table .status-chip.rejected { background: var(--red-bg); }
+.db-op-row { cursor: pointer; }
+.db-op-row td { transition: background .15s ease; }
+.db-op-row:hover td { background: #f6f9ff; }
+.db-op-row:hover .op-name { color: var(--accent); }
+.db-op-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.op-detail-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; margin-bottom: 6px;
+  background: var(--bg); border-radius: 12px;
+}
+.op-detail-main { flex: 1; min-width: 0; }
+.op-detail-name { font-size: 15.5px; font-weight: 600; }
+.op-detail-desc { color: var(--muted); font-size: 13px; margin-top: 3px; }
+.op-detail-amount { font-size: 20px; font-weight: 700; white-space: nowrap; }
+.op-detail-amount.in { color: var(--green); }
+.op-detail-amount.out { color: var(--red); }
+.op-detail-rows .review-row .v { display: inline-flex; align-items: center; justify-content: flex-end; }
+.op-detail-rows .status-chip { padding: 3px 10px; border-radius: 8px; background: var(--green-bg); font-size: 12px; font-weight: 500; }
+.op-detail-rows .status-chip.pending { background: #fdf5e0; }
+.op-detail-rows .status-chip.rejected { background: var(--red-bg); }
+@media (max-width: 560px) {
+  .op-detail-head { flex-wrap: wrap; }
+  .op-detail-amount { width: 100%; font-size: 18px; }
+}
+
+/* ---------- Guest görünüşü (login olmayan istifadəçi) ---------- */
+.db-guest .db-columns { display: block; max-width: 640px; }
+.db-guest-cta {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: var(--accent-light);
+}
+.db-guest-cta h3 { margin: 0 0 6px; font-size: 17px; }
+.db-guest-cta p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; max-width: 460px; }
+.db-guest-actions { display: flex; gap: 10px; flex-shrink: 0; }
+@media (max-width: 720px) {
+  .db-guest-cta { flex-direction: column; align-items: flex-start; }
+}

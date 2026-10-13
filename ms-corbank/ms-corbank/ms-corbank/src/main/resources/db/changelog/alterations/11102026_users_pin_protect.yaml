@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 11102026_users_pin_protect
+      author: corbank
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column: { name: pin_hash, type: VARCHAR(64), constraints: { unique: true, uniqueConstraintName: uq_users_pin_hash } }
+              - column: { name: pin_encrypted, type: VARCHAR(255) }
+        - dropColumn:
+            tableName: users
+            columnName: pin_code

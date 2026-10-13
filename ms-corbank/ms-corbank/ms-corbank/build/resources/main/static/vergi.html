@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Vergi və büdcə ödənişləri</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+<link rel="stylesheet" href="css/vergi.css?v=1">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+    <!-- topbar injected by JS -->
+    <main class="vg-page">
+      <a class="vg-back" href="muhasibatliq.html"><span id="iconBack"></span> Mühasibatlıq</a>
+      <div class="vg-head">
+        <div>
+          <h1>Vergi və büdcə ödənişləri</h1>
+          <p>Vergi öhdəlikləri, son tarixlər və büdcəyə ödənişlər — bütün banklar üzrə bir yerdə</p>
+        </div>
+      </div>
+
+      <div class="vg-tabs" role="tablist">
+        <button class="vg-tab active" role="tab" data-tab="icmal">İcmal</button>
+        <button class="vg-tab" role="tab" data-tab="odenis">Ödəniş et</button>
+        <button class="vg-tab" role="tab" data-tab="tarixce">Tarixçə</button>
+      </div>
+
+      <!-- ================= İCMAL ================= -->
+      <section class="vg-panel active" id="panel-icmal">
+        <div id="vgAlerts"></div>
+        <div class="vg-kpis" id="vgKpis"></div>
+
+        <div class="vg-grid">
+          <div class="card vg-card">
+            <div class="vg-card-head">
+              <h2>Yaxınlaşan ödənişlər</h2>
+              <span class="vg-muted" id="upcomingNote"></span>
+            </div>
+            <div id="upcomingList"></div>
+          </div>
+
+          <div class="card vg-card vg-cal-card">
+            <div class="vg-card-head">
+              <h2>Vergi təqvimi</h2>
+              <div class="vg-cal-nav">
+                <button type="button" class="vg-icon-btn" id="calPrev" aria-label="Əvvəlki ay">‹</button>
+                <span id="calTitle"></span>
+                <button type="button" class="vg-icon-btn" id="calNext" aria-label="Növbəti ay">›</button>
+              </div>
+            </div>
+            <div class="vg-cal" id="calGrid"></div>
+            <div class="vg-cal-legend">
+              <span><i class="lg pending"></i>Gözləyir</span>
+              <span><i class="lg paid"></i>Ödənilib</span>
+              <span><i class="lg overdue"></i>Gecikib</span>
+            </div>
+            <div class="vg-cal-day" id="calDay"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ÖDƏNİŞ ET ================= -->
+      <section class="vg-panel" id="panel-odenis">
+        <div class="vg-pay">
+          <form class="card vg-card vg-form" id="payForm" novalidate>
+            <h2>Büdcəyə ödəniş</h2>
+
+            <div class="vg-field">
+              <label for="fTax">Vergi / ödəniş növü</label>
+              <select id="fTax"></select>
+            </div>
+
+            <div class="vg-field">
+              <label>Ödənişin təyinatı</label>
+              <div class="vg-seg" id="fKind">
+                <button type="button" data-kind="esas" class="active">Əsas məbləğ</button>
+                <button type="button" data-kind="faiz">Faiz (penya)</button>
+                <button type="button" data-kind="sanksiya">Maliyyə sanksiyası</button>
+              </div>
+            </div>
+
+            <div class="vg-field">
+              <label for="fPeriod">Dövr</label>
+              <select id="fPeriod"></select>
+              <div class="vg-hint" id="periodHint"></div>
+            </div>
+
+            <div class="vg-field">
+              <label>Ödəniş hesabı <span class="vg-muted">(yalnız AZN hesabları)</span></label>
+              <div class="vg-accounts" id="fAccounts"></div>
+            </div>
+
+            <div class="vg-field">
+              <label for="fAmount">Məbləğ (AZN)</label>
+              <input id="fAmount" type="number" min="0.01" step="0.01" placeholder="0,00" inputmode="decimal">
+              <div class="vg-hint" id="amountHint"></div>
+            </div>
+
+            <div class="vg-field">
+              <label for="fNote">Əlavə qeyd <span class="vg-muted">(istəyə bağlı)</span></label>
+              <input id="fNote" type="text" maxlength="80" placeholder="Məs: sentyabr ayı üzrə">
+            </div>
+
+            <div class="vg-form-error" id="formError"></div>
+            <div class="vg-form-actions">
+              <button type="button" class="btn-ghost" id="resetBtn">Təmizlə</button>
+              <button type="submit" class="btn-primary">Davam et</button>
+            </div>
+          </form>
+
+          <aside class="card vg-card vg-order">
+            <div class="vg-order-head">
+              <span class="vg-order-badge">Ödəniş tapşırığı</span>
+              <span class="vg-muted">avtomatik doldurulur</span>
+            </div>
+            <div id="orderPreview"></div>
+            <div class="info-note vg-note">Büdcə təsnifat kodları rəsmi təsnifatdan nümunə kimi götürülüb. Real inteqrasiyada kodlar və Xəzinədarlıq rekvizitləri bankın soraqçasından avtomatik yenilənəcək.</div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================= TARİXÇƏ ================= -->
+      <section class="vg-panel" id="panel-tarixce">
+        <div class="card vg-card">
+          <div class="vg-card-head">
+            <h2>İllik xülasə</h2>
+            <select class="vg-select-sm" id="sumYear"></select>
+          </div>
+          <div class="vg-summary" id="yearSummary"></div>
+        </div>
+
+        <div class="card vg-card">
+          <div class="vg-card-head">
+            <h2>Ödənişlər</h2>
+            <button class="vg-btn-outline" type="button" id="csvBtn"><span id="iconCsv"></span> CSV yüklə</button>
+          </div>
+          <div class="vg-filters">
+            <div class="vg-field"><label for="hTax">Vergi növü</label><select id="hTax"></select></div>
+            <div class="vg-field"><label for="hYear">İl</label><select id="hYear"></select></div>
+            <div class="vg-field"><label for="hBank">Bank</label><select id="hBank"></select></div>
+          </div>
+          <div class="vg-table-wrap">
+            <table class="vg-table">
+              <thead>
+                <tr><th>Ödəniş tarixi</th><th>Vergi / dövr</th><th>Büdcə kodu</th><th>Bank</th><th>Məbləğ</th><th>Status</th><th>Qəbz</th></tr>
+              </thead>
+              <tbody id="histBody"></tbody>
+            </table>
+          </div>
+          <div class="vg-empty" id="histEmpty" style="display:none">Bu filtrlərə uyğun ödəniş tapılmadı.</div>
+          <div class="vg-pager">
+            <span class="vg-muted" id="histCount"></span>
+            <div class="vg-pager-controls">
+              <button class="vg-btn-outline" type="button" id="hPrev">Əvvəlki</button>
+              <span id="hPage">1 / 1</span>
+              <button class="vg-btn-outline" type="button" id="hNext">Növbəti</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="vg-demo-note">Demo məlumatlar · Son tarixlər Vergi Məcəlləsinə əsasən (taxes.gov.az vergi təqvimi)</div>
+    </main>
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400400"></script>
+<script src="js/mock-api.js?v=1791400400"></script>
+<script src="js/common.js?v=1791400400"></script>
+<script src="js/tax-data.js?v=1"></script>
+<script src="js/vergi.js?v=2"></script>
+</body>
+</html>

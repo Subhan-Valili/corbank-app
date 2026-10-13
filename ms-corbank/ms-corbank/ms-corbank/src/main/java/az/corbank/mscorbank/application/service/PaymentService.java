@@ -1,6 +1,7 @@
 package az.corbank.mscorbank.application.service;
 
-import az.corbank.mscorbank.domain.model.Bank;
+import az.corbank.mscorbank.application.exception.AccountNotFoundException;
+import az.corbank.mscorbank.domain.model.Account;
 import az.corbank.mscorbank.domain.model.PaymentCommand;
 import az.corbank.mscorbank.domain.model.PaymentResult;
 import az.corbank.mscorbank.application.port.in.MakePaymentUseCase;
@@ -15,10 +16,11 @@ class PaymentService implements MakePaymentUseCase {
         this.banks = banks;
     }
 
-    /** The bank that owns the source account executes the payment; ABB is recognised first (see AccountService). */
+    /** Ödəniş yalnız cari istifadəçinin ÖZ hesabından olur; hesabın sahibi olan bank icra edir. */
     @Override
     public PaymentResult pay(PaymentCommand command) {
-        boolean abbAccount = banks.findAccountSafely(Bank.ABB, command.fromAccountId()).isPresent();
-        return banks.require(abbAccount ? Bank.ABB : Bank.PASHA).submitPayment(command);
+        Account from = banks.findOwnedAccount(command.fromAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(command.fromAccountId()));
+        return banks.require(from.bank()).submitPayment(command);
     }
 }

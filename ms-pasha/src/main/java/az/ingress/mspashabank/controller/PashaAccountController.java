@@ -18,6 +18,16 @@ public class PashaAccountController {
         return pashaBankAccountService.getAccounts(customerNo);
     }
 
+    @GetMapping("/by-pin")
+    public List<PashaAccountResponseDto> findAllAccountsByPin(@RequestHeader("X-Pin") String pin) {
+        return pashaBankAccountService.getAccountsByPin(pin);
+    }
+
+    @GetMapping("/by-tin")
+    public List<PashaAccountResponseDto> findAllAccountsByTin(@RequestParam String tin) {
+        return pashaBankAccountService.getAccountsByTin(tin);
+    }
+
     @GetMapping("/{accountId}")
     public PashaAccountResponseDto findAccountByAccountId(@PathVariable String accountId) {
         return pashaBankAccountService.getAccountByAccountId(accountId);

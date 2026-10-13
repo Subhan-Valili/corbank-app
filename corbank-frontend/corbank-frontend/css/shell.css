@@ -201,3 +201,8 @@
 .bulk-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .bulk-table th { position: sticky; top: 0; background: #f7f9fd; text-align: left; color: var(--muted); padding: 8px 12px; font-weight: 600; }
 .bulk-table td { padding: 8px 12px; border-top: 1px solid var(--border); white-space: nowrap; }
+
+/* ---------- Guest topbar: Daxil ol / Qeydiyyat ---------- */
+.topbar-auth { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 18px; }
+.btn-primary, .btn-ghost { text-decoration: none; }
+a.btn-primary { color: #fff; }

@@ -12,12 +12,6 @@ import java.util.Optional;
 @Service
 class AccountService implements ListAccountsUseCase, GetAccountUseCase {
 
-    /**
-     * ABB is asked first: its account id IS its IBAN, whereas PASHA may answer an unknown id with
-     * some default account, which would wrongly shadow an ABB (e.g. USD/EUR) account.
-     */
-    private static final List<Bank> LOOKUP_ORDER = List.of(Bank.ABB, Bank.PASHA);
-
     private final BankGateways banks;
 
     AccountService(BankGateways banks) {
@@ -34,10 +28,7 @@ class AccountService implements ListAccountsUseCase, GetAccountUseCase {
 
     @Override
     public Optional<Account> getAccount(String accountId) {
-        for (Bank bank : LOOKUP_ORDER) {
-            Optional<Account> account = banks.findAccountSafely(bank, accountId);
-            if (account.isPresent()) return account;
-        }
-        return Optional.empty();
+        // yalnız cari istifadəçinin öz hesabları arasında
+        return banks.findOwnedAccount(accountId);
     }
 }

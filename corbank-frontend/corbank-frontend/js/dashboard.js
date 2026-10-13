@@ -61,6 +61,40 @@ function accountCardHtml(acc) {
   </a>`;
 }
 
+// "Bütün banklar" rejimi: hər valyuta üçün bir kart — banklar üzrə qalıqlar və cəm
+const CUR_ORDER = ['AZN', 'USD', 'EUR'];
+function currencySumCardsHtml(accounts) {
+  const groups = {};
+  accounts.forEach(a => { (groups[a.currency] = groups[a.currency] || []).push(a); });
+  const curs = Object.keys(groups).sort((a, b) =>
+    (CUR_ORDER.indexOf(a) + 1 || 99) - (CUR_ORDER.indexOf(b) + 1 || 99));
+  return curs.map(cur => {
+    const list = groups[cur].slice().sort((a, b) => Number(b.balance) - Number(a.balance));
+    const total = Math.round(list.reduce((s, a) => s + Number(a.balance || 0), 0) * 100) / 100;
+    const [intPart, decPart] = Fmt.moneySplit(total);
+    const rows = list.map(a => {
+      const share = total > 0 ? Math.max(2, Number(a.balance) / total * 100) : 0;
+      return `
+      <a class="db-sum-row" href="${accountUrl(a.id)}" title="${esc(accountLabel(a))}">
+        <span class="db-sum-bank">${bankLogoImg(bankTitle(a.bank), 22)}<span>${esc(bankTitle(a.bank) || a.name)}</span></span>
+        <span class="db-sum-amount">${Fmt.money(a.balance, cur)}</span>
+      </a>
+      ${list.length > 1 ? `<div class="db-sum-share"><span style="width:${share.toFixed(1)}%"></span></div>` : ''}`;
+    }).join('');
+    return `
+    <div class="db-account db-account-sum">
+      <div class="db-account-top">
+        <div class="db-account-id">${flagImg(cur, 44)}<span>${esc(cur)} · Bütün banklar</span></div>
+        <span class="db-sum-count">${list.length} hesab</span>
+      </div>
+      <div class="db-account-mid">
+        <div class="db-balance">${intPart}<small>,${decPart} ${esc(cur)}</small></div>
+      </div>
+      <div class="db-sum-rows">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
 function projectCardHtml(p) {
   const iconMap = { credit: DbIcons.coins, deposit: DbIcons.percent, payroll: DbIcons.users };
   const labelMap = { credit: 'Biznes krediti', deposit: 'Müddətli depozit', payroll: 'Əmək haqqı layihəsi' };
@@ -76,10 +110,18 @@ function projectCardHtml(p) {
   </a>`;
 }
 
-function opRowHtml(op) {
+const OP_STATUS = {
+  completed: { label: 'Yerinə yetirildi', cls: '' },
+  pending:   { label: 'Gözləmədə', cls: 'pending' },
+  rejected:  { label: 'Rədd edildi', cls: 'rejected' },
+};
+const opStatus = st => OP_STATUS[st] || OP_STATUS.completed;
+
+function opRowHtml(op, i) {
   const isIn = op.direction === 'in';
+  const st = opStatus(op.status);
   return `
-  <tr>
+  <tr class="db-op-row" data-op-idx="${i}" tabindex="0" role="button" title="Ətraflı məlumat üçün klikləyin">
     <td class="db-date">${Fmt.dateAz(op.date)}</td>
     <td>
       <div class="op-counterparty">
@@ -90,8 +132,9 @@ function opRowHtml(op) {
         </div>
       </div>
     </td>
+    <td>${opBankHtml(op.bank)}</td>
     <td class="amount ${isIn ? 'in' : 'out'}">${isIn ? '+' : '−'}${Fmt.money(op.amount, op.currency)}</td>
-    <td><span class="status-chip"><span class="dot"></span>Yerinə yetirildi</span></td>
+    <td><span class="status-chip ${st.cls}"><span class="dot"></span>${st.label}</span></td>
   </tr>`;
 }
 
@@ -125,8 +168,8 @@ function connectedBankRowHtml(b, active) {
   </div>`;
   }
   return `
-  <div class="db-bank db-bank-switch${active ? ' is-active' : ''}" role="button" tabindex="0"
-       data-bank="${esc(b.code)}" aria-pressed="${active}">
+  <div class="db-bank db-bank-switch${active ? ' is-active' : ''}" role="radio" tabindex="0"
+       data-bank="${esc(b.code)}" aria-checked="${active}">
     <div class="db-bank-left">
       ${bankLogoImg(b.name, 36)}
       <span class="db-bank-name">${esc(b.name)}</span>
@@ -138,19 +181,67 @@ function connectedBankRowHtml(b, active) {
   </div>`;
 }
 
+const ALL_BANKS_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5"/><path d="M3 16.5l9 4.5 9-4.5"/></svg>`;
+
+function allBanksRowHtml(total, active) {
+  return `
+  <div class="db-bank db-bank-switch${active ? ' is-active' : ''}" role="button" tabindex="0"
+       data-bank="${BankSel.ALL}" role="radio" aria-checked="${active}">
+    <div class="db-bank-left">
+      <span class="db-allbanks-icon">${ALL_BANKS_ICON}</span>
+      <span class="db-bank-name">Bütün banklar</span>
+    </div>
+    <div class="db-bank-right">
+      <span class="db-bank-count">${total} hesab</span>
+      <span class="db-bank-check" aria-hidden="true">${active ? '✓' : ''}</span>
+    </div>
+  </div>`;
+}
+
 function renderBanks() {
   const connected = dash.connectedBanks || [];
   const others = dash.otherBanks || [];
-  const hint = connected.filter(bankOn).length > 1
-    ? `<div class="db-bank-hint">${dash.selectedBank ? 'Yalnız seçilmiş bankın hesabları göstərilir. Hamısı üçün seçilmiş banka yenidən klikləyin.' : 'Bankı seçin — hesablar və əməliyyatlar həmin banka görə göstəriləcək.'}</div>`
-    : '';
+  const on = connected.filter(bankOn);
+  const isAll = BankSel.get() === BankSel.ALL;
+  const total = on.reduce((s, b) => s + Number(b.accountCount || 0), 0);
+  const hintText = isAll
+    ? 'Bütün banklar üzrə valyuta cəmləri göstərilir. Konkret bankın hesabları üçün həmin bankı seçin.'
+    : 'Yalnız seçilmiş bankın hesabları və əməliyyatları göstərilir.';
+  const multi = on.length > 1;
   document.getElementById('banksList').innerHTML =
-    connected.map(b => connectedBankRowHtml(b, b.code === dash.selectedBank)).join('') + hint + others.map(bankRowHtml).join('');
+    (multi ? allBanksRowHtml(total, isAll) : '') +
+    connected.map(b => connectedBankRowHtml(b, !isAll && b.code === dash.selectedBank)).join('') +
+    (multi ? `<div class="db-bank-hint">${hintText}</div>` : '') +
+    others.map(bankRowHtml).join('');
 }
 
+// Seçim məcburidir: həmişə ya "Bütün banklar", ya da bir bank seçili olur. Seçili olana klik heç nə dəyişmir.
 function switchBank(code) {
-  BankSel.set(BankSel.get() === code ? '' : code);
-  load();
+  if (!code || BankSel.get() === code) return;
+  BankSel.set(code);
+  load(true);
+}
+
+// Məzmunu yumşaq dəyiş: köhnəsi solur, blokun hündürlüyü yeni məzmuna axıcı keçir, yenisi görünür
+const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function swapContent(box, target, html, animate) {
+  if (!animate || reduceMotion()) { target.innerHTML = html; return; }
+  const h0 = box.offsetHeight;
+  box.style.height = h0 + 'px';
+  box.style.overflow = 'hidden';
+  target.classList.add('db-swap', 'db-fading');
+  await wait(180);
+  target.innerHTML = html;
+  box.style.height = 'auto';
+  const h1 = box.offsetHeight;
+  box.style.height = h0 + 'px';
+  void box.offsetHeight;                       // reflow — keçid başlasın
+  box.style.transition = 'height .4s cubic-bezier(.4, 0, .2, 1)';
+  box.style.height = h1 + 'px';
+  requestAnimationFrame(() => target.classList.remove('db-fading'));
+  await wait(420);
+  box.style.height = ''; box.style.overflow = ''; box.style.transition = '';
 }
 
 function fxRowHtml(r) {
@@ -278,6 +369,69 @@ function openFxModal() {
   });
 }
 
+// ---------------------------------------------------------------
+// Əməliyyatın ətraflı məlumatı (Son əməliyyatlar → sətrə klik)
+// ---------------------------------------------------------------
+// Demo əməliyyat id-sindən sabit 10 rəqəmli istinad nömrəsi
+function opReference(op) {
+  let h = 2166136261;
+  for (const ch of String(op.id)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  const d = op.date ? op.date.replace(/-/g, '').slice(2) : '';
+  return `TRX-${d}-${String(h >>> 0).padStart(10, '0').slice(-6)}`;
+}
+
+function openOpModal(op) {
+  if (!op) return;
+  const isIn = op.direction === 'in';
+  const st = opStatus(op.status);
+  const acc = (dash.accounts || []).find(a => a.id === op.accountId);
+  const bankName = bankTitle(op.bank || (acc && acc.bank)) || '—';
+  const sign = isIn ? '+' : '−';
+  const rows = [
+    ['İstinad nömrəsi', opReference(op)],
+    ['Tarix', Fmt.dateAz(op.date)],
+    ['Əməliyyatın növü', isIn ? 'Mədaxil (daxilolma)' : 'Məxaric (ödəniş)'],
+    [isIn ? 'Göndərən' : 'Alan', esc(op.counterparty)],
+    ['Təyinat', esc(op.description || '—')],
+    ['Bank', `<span class="op-bank">${bankLogoImg(bankName, 22)}<span>${esc(bankName)}</span></span>`],
+    [isIn ? 'Mədaxil olunan hesab' : 'Məxaric olunan hesab', acc ? esc(accountLabel(acc)) : '—'],
+    ['IBAN', acc ? esc(formatIban(acc.iban)) : '—'],
+    ['Valyuta', esc(op.currency)],
+    ['Status', `<span class="status-chip ${st.cls}"><span class="dot"></span>${st.label}</span>`],
+  ];
+  openModal({
+    title: 'Əməliyyat haqqında',
+    subtitle: `${esc(bankName)} · ${Fmt.dateAz(op.date)}`,
+    bodyHtml: `
+      <div class="op-detail-head">
+        <div class="op-icon ${isIn ? 'in' : 'out'}">${isIn ? Icons.arrowDown : Icons.arrowUp}</div>
+        <div class="op-detail-main">
+          <div class="op-detail-name">${esc(op.counterparty)}</div>
+          <div class="op-detail-desc">${esc(op.description || '')}</div>
+        </div>
+        <div class="op-detail-amount ${isIn ? 'in' : 'out'}">${sign}${Fmt.money(op.amount, op.currency)}</div>
+      </div>
+      <div class="op-detail-rows">
+        ${rows.map(([k, v]) => `<div class="review-row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
+      </div>
+      <div class="info-note">Demo məlumatdır.</div>`,
+    footerHtml: `
+      <button class="btn-ghost" type="button" onclick="closeModal()">Bağla</button>
+      ${acc ? `<a class="btn-primary" href="${accountUrl(acc.id)}">Hesaba keç</a>` : ''}`,
+  });
+}
+
+const opsBodyEl = document.getElementById('opsBody');
+opsBodyEl.addEventListener('click', (e) => {
+  const row = e.target.closest('.db-op-row');
+  if (row) openOpModal(dash.recentOperations[Number(row.dataset.opIdx)]);
+});
+opsBodyEl.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const row = e.target.closest('.db-op-row');
+  if (row) { e.preventDefault(); openOpModal(dash.recentOperations[Number(row.dataset.opIdx)]); }
+});
+
 // Klik hadisələri (dinamik yaradılan kartlar üçün delegation)
 document.getElementById('projectsGrid').addEventListener('click', (e) => {
   const card = e.target.closest('.db-project');
@@ -301,20 +455,70 @@ document.getElementById('fxLink').addEventListener('click', (e) => { e.preventDe
 // ---------------------------------------------------------------
 // Load
 // ---------------------------------------------------------------
-async function load() {
+// Guest (login olmayan): yalnız açıq məlumat — valyuta məzənnələri. Şəxsi data yoxdur.
+async function loadGuest() {
+  const page = document.querySelector('.db-page');
+  page.classList.add('db-guest');
+  document.querySelector('.db-head h1').textContent = 'COR Bank Business';
+  document.querySelector('.db-head p').textContent = 'Hesablarınızı görmək üçün daxil olun.';
+  const hide = el => { if (el) el.style.display = 'none'; };   // [hidden] CSS-dəki display ilə üstələnir
+  hide(document.querySelector('#accountsGrid').closest('.db-panel').querySelector('.db-link'));
+  hide(document.getElementById('fxLink'));
+  [document.getElementById('projectsGrid').closest('.db-collapse'),
+   document.getElementById('opsBody').closest('.db-panel'),
+   document.getElementById('banksList').closest('.db-panel'),
+   document.getElementById('ordersGrid').closest('.db-collapse')
+  ].forEach(hide);
+
+  document.getElementById('accountsGrid').innerHTML = `
+    <div class="db-guest-cta">
+      <div>
+        <h3>Hesablarınız burada görünəcək</h3>
+        <p>Daxil olduqdan sonra yalnız sizə aid hesabları, son əməliyyatları və ödənişləri görəcəksiniz.</p>
+      </div>
+      <div class="db-guest-actions">
+        <a class="btn-primary" href="login.html">Daxil ol</a>
+        <a class="btn-ghost" href="register.html">Qeydiyyat</a>
+      </div>
+    </div>`;
   try {
+    const rates = await Api.publicGet('/public/fx-rates');
+    document.getElementById('fxList').innerHTML = rates.map(fxRowHtml).join('');
+  } catch (e) {
+    console.error(e);
+    document.getElementById('fxList').innerHTML = '<p style="color:var(--muted);padding:8px 0">Məzənnələri yükləmək mümkün olmadı.</p>';
+  }
+}
+
+async function load(animate = false) {
+  if (!Auth.isLoggedIn()) return loadGuest();
+  try {
+    // Seçim yoxdursa (ilk giriş) — standart olaraq "Bütün banklar"
+    if (!BankSel.get()) BankSel.set(BankSel.ALL);
     dash = await Api.get('/dashboard' + BankSel.query());
-    // Saxlanmış bank artıq qoşulu deyilsə (məs. Pasha söndürülüb) seçimi təmizlə
-    if (BankSel.get() && dash.selectedBank !== BankSel.get()) BankSel.set('');
-    document.getElementById('accountsGrid').innerHTML = dash.accounts.map(accountCardHtml).join('');
+    // Saxlanmış bank artıq qoşulu deyilsə (məs. Pasha söndürülüb) — "Bütün banklar"a qayıt
+    if (BankSel.get() !== BankSel.ALL && dash.selectedBank !== BankSel.get()) {
+      BankSel.set(BankSel.ALL);
+      dash = await Api.get('/dashboard');
+    }
+    const isAll = BankSel.get() === BankSel.ALL;
+
+    // "Bütün banklar": yalnız Hesablarım (valyuta cəmləri) və Son əməliyyatlar qalır, digər bölmələr yumşaq gizlənir
+    document.querySelector('.db-page').classList.toggle('db-mode-all', isAll);
+    const accGrid = document.getElementById('accountsGrid');
+    const accHtml = isAll ? currencySumCardsHtml(dash.accounts) : dash.accounts.map(accountCardHtml).join('');
+    const opsBody = document.getElementById('opsBody');
     document.getElementById('projectsGrid').innerHTML = dash.otherProjects.map(projectCardHtml).join('');
-    document.getElementById('opsBody').innerHTML = dash.recentOperations.map(opRowHtml).join('');
     renderBanks();
+    await Promise.all([
+      swapContent(accGrid, accGrid, accHtml, animate),
+      swapContent(opsBody.closest('.db-table-wrap'), opsBody, dash.recentOperations.map((op, i) => opRowHtml(op, i)).join(''), animate),
+    ]);
     document.getElementById('fxList').innerHTML = dash.exchangeRates.map(fxRowHtml).join('');
   } catch (e) {
     console.error(e);
     document.querySelector('.db-page').insertAdjacentHTML('afterbegin',
-      '<p style="color:#d84343">Məlumatları yükləmək mümkün olmadı. Backend işə salınıbmı? (mvn spring-boot:run)</p>');
+      '<p style="color:#d84343">Məlumatları yükləmək mümkün olmadı. Backend işə salınıbmı?</p>');
   }
 }
 

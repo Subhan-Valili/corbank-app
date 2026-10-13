@@ -10,6 +10,7 @@ import az.corbank.mscorbank.domain.model.PaymentCommand;
 import az.corbank.mscorbank.domain.model.PaymentResult;
 import az.corbank.mscorbank.application.port.out.BankGateway;
 import az.corbank.mscorbank.application.port.out.BankUnavailableException;
+import az.corbank.mscorbank.application.port.out.CurrentCustomerPort;
 import az.corbank.mscorbank.adapter.out.abb.client.AbbAccountFeignClient;
 import az.corbank.mscorbank.adapter.out.abb.dto.AbbAccountResponseDto;
 import az.corbank.mscorbank.adapter.out.abb.dto.AbbOperationLineDto;
@@ -35,9 +36,11 @@ class AbbBankAdapter implements BankGateway {
     private static final DateTimeFormatter ABB_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     private final AbbAccountFeignClient client;
+    private final CurrentCustomerPort customer;
 
-    AbbBankAdapter(AbbAccountFeignClient client) {
+    AbbBankAdapter(AbbAccountFeignClient client, CurrentCustomerPort customer) {
         this.client = client;
+        this.customer = customer;
     }
 
     @Override
@@ -46,34 +49,31 @@ class AbbBankAdapter implements BankGateway {
     }
 
     @Override
-    public List<Account> findAllAccounts() {
+    public List<Account> findAllAccounts(String pin) {
         try {
-            return client.findAllAccounts().stream().map(this::toAccount).toList();
+            return client.findAllAccounts(pin).stream().map(this::toAccount).toList();
         } catch (Exception e) {
             throw new BankUnavailableException(Bank.ABB, e.getMessage(), e);
         }
     }
 
-    /** An ABB account is identified by its IBAN (falling back to the account number). */
-    @Override
-    public Optional<Account> findAccount(String accountId) {
-        if (accountId == null) return Optional.empty();
-        return findAllAccounts().stream()
-                .filter(a -> accountId.equalsIgnoreCase(a.id()) || accountId.equalsIgnoreCase(a.iban()))
-                .findFirst();
-    }
-
     @Override
     public List<Operation> findOperations(String accountId, LocalDate fromDate, LocalDate toDate) {
+        // ms-abb hər sorğuda PIN tələb edir (X-Customer-Pin) — hesabın bu müştəriyə aid olduğunu yoxlamaq üçün.
+        String pin = customer.currentPin().orElse(null);
+        if (pin == null) {
+            log.warn("ABB çıxarışı üçün cari istifadəçinin PIN-i yoxdur (accountId={})", accountId);
+            return List.of();
+        }
         try {
             LocalDate to = toDate != null ? toDate : LocalDate.now();
             LocalDate from = fromDate != null ? fromDate : to.minusDays(90);
             AbbStatementResponseDto statement = client.getStatement(
-                    accountId, from.format(QUERY_DATE), to.format(QUERY_DATE), 1, 200);
+                    pin, accountId, from.format(QUERY_DATE), to.format(QUERY_DATE), 1, 200);
             // ABB (and its mock) do not always honour the date range — filter here so both banks
             // behave the same for the same UI filter.
             return statement.transactions().stream()
-                    .map(this::toOperation)
+                    .map(op -> toOperation(op, accountId))
                     .filter(op -> withinRange(op.date(), from, to))
                     .toList();
         } catch (Exception e) {
@@ -82,9 +82,17 @@ class AbbBankAdapter implements BankGateway {
     }
 
     @Override
-    public List<Operation> findRecentOperations(int limit) {
+    public List<Operation> findRecentOperations(String pin, int limit) {
         try {
-            return client.getRecentHistory(limit).stream().map(this::toOperation).toList();
+            // ms-abb sətirlərində hesab nömrəsi var, ms-corbank-da isə Account.id (IBAN) — xəritələyirik
+            java.util.Map<String, String> idByNumber = new java.util.HashMap<>();
+            for (AbbAccountResponseDto a : client.findAllAccounts(pin)) {
+                String id = a.iban() != null ? a.iban() : a.accountNumber();
+                if (a.accountNumber() != null) idByNumber.put(a.accountNumber(), id);
+            }
+            return client.getRecentHistory(pin, limit).stream()
+                    .map(op -> toOperation(op, idByNumber.getOrDefault(op.accountNumber(), op.accountNumber())))
+                    .toList();
         } catch (Exception e) {
             throw new BankUnavailableException(Bank.ABB, e.getMessage(), e);
         }
@@ -122,7 +130,7 @@ class AbbBankAdapter implements BankGateway {
         return new Account(id, name, a.availableBalance(), a.currency(), a.iban(), AccountStatus.ACTIVE, Bank.ABB);
     }
 
-    private Operation toOperation(AbbOperationLineDto op) {
+    private Operation toOperation(AbbOperationLineDto op, String accountId) {
         return new Operation(
                 op.reference(),
                 parseDate(op.date()),
@@ -131,7 +139,9 @@ class AbbBankAdapter implements BankGateway {
                 op.amount() != null ? op.amount() : BigDecimal.ZERO,
                 op.currency(),
                 "IN".equalsIgnoreCase(op.direction()) ? OperationDirection.IN : OperationDirection.OUT,
-                OperationStatus.COMPLETED);
+                OperationStatus.COMPLETED,
+                accountId,
+                Bank.ABB);
     }
 
     /** ABB uses dd.MM.yyyy; ISO is accepted too. Anything else becomes null (unknown date). */

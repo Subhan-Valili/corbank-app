@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COR Bank Business — Aİ Vergi Agenti</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/shell.css?v=2">
+<link rel="stylesheet" href="css/vergi.css?v=1">
+<link rel="stylesheet" href="css/ai-vergi.css?v=1">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- sidebar injected by JS -->
+  <div class="shell">
+    <!-- topbar injected by JS -->
+    <main class="vg-page">
+      <a class="vg-back" href="muhasibatliq.html"><span id="iconBack"></span> Mühasibatlıq</a>
+
+      <div class="ai-hero">
+        <div class="ai-avatar" id="aiAvatar"></div>
+        <div class="ai-hero-text">
+          <div class="ai-hero-title">
+            <h1>Aİ Vergi Agenti</h1>
+            <span class="ai-badge">Demo · ssenarili</span>
+          </div>
+          <p id="heroSummary">Şirkətin əməliyyatları analiz olunur…</p>
+        </div>
+        <button class="vg-btn-outline ai-rescan" type="button" id="rescanBtn"><span id="iconRefresh"></span> Yenidən analiz et</button>
+      </div>
+
+      <div class="vg-tabs ai-tabs" role="tablist">
+        <button class="vg-tab active" role="tab" data-tab="findings">Tapıntılar <span class="ai-count" id="cntFindings"></span></button>
+        <button class="vg-tab" role="tab" data-tab="ops">Əməliyyat yoxlanışı <span class="ai-count" id="cntOps"></span></button>
+        <button class="vg-tab" role="tab" data-tab="chat">Söhbət</button>
+        <button class="vg-tab" role="tab" data-tab="calc">Kalkulyatorlar</button>
+        <button class="vg-tab" role="tab" data-tab="docs">Sənədlər və yeniliklər</button>
+      </div>
+
+      <!-- ============ TAPINTILAR ============ -->
+      <section class="vg-panel active" id="panel-findings">
+        <div class="ai-scan" id="scanBox">
+          <div class="ai-scan-bar"><span></span></div>
+          <div class="ai-scan-steps" id="scanSteps"></div>
+        </div>
+        <div class="ai-findings" id="findingsList"></div>
+      </section>
+
+      <!-- ============ ƏMƏLİYYAT YOXLANIŞI ============ -->
+      <section class="vg-panel" id="panel-ops">
+        <div class="card vg-card">
+          <div class="vg-card-head">
+            <div>
+              <h2>Əməliyyatların vergi baxımından yoxlanışı</h2>
+              <div class="vg-muted ai-sub">Son 90 gün · bütün banklar · agent hər əməliyyata vergi etiketi qoyur</div>
+            </div>
+          </div>
+          <div class="ai-op-stats" id="opStats"></div>
+          <div class="ai-op-filters">
+            <div class="vg-seg" id="opFilter">
+              <button type="button" data-f="all" class="active">Hamısı</button>
+              <button type="button" data-f="risk">Yoxlanmalı</button>
+              <button type="button" data-f="nonres">Qeyri-rezident</button>
+              <button type="button" data-f="ok">Qaydasındadır</button>
+            </div>
+            <select class="vg-select-sm" id="opBank"><option value="all">Bütün banklar</option></select>
+          </div>
+          <div class="vg-table-wrap">
+            <table class="vg-table ai-op-table">
+              <thead><tr><th>Tarix</th><th>Qarşı tərəf</th><th>Bank</th><th>Məbləğ</th><th>Agentin rəyi</th><th></th></tr></thead>
+              <tbody id="opBody"></tbody>
+            </table>
+          </div>
+          <div class="vg-empty" id="opEmpty" style="display:none">Bu filtrə uyğun əməliyyat yoxdur.</div>
+          <div class="vg-pager">
+            <span class="vg-muted" id="opCount"></span>
+            <div class="vg-pager-controls">
+              <button class="vg-btn-outline" type="button" id="opPrev">Əvvəlki</button>
+              <span id="opPage">1 / 1</span>
+              <button class="vg-btn-outline" type="button" id="opNext">Növbəti</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SÖHBƏT ============ -->
+      <section class="vg-panel" id="panel-chat">
+        <div class="card ai-chat">
+          <div class="ai-chat-log" id="chatLog" aria-live="polite"></div>
+          <div class="ai-chips" id="chatChips"></div>
+          <form class="ai-chat-input" id="chatForm" autocomplete="off">
+            <input id="chatInput" type="text" placeholder="Sualınızı yazın… məs: “bu ay nə qədər vergi ödəməliyəm?”" maxlength="300">
+            <button class="btn-primary" type="submit" id="chatSend">Göndər</button>
+          </form>
+          <div class="ai-disclaimer">Cavablar məsləhət xarakterlidir və şirkətin demo məlumatlarına əsaslanır. Rəsmi mövqe üçün Vergi Məcəlləsinə və ya 195-1 Çağrı Mərkəzinə müraciət edin.</div>
+        </div>
+      </section>
+
+      <!-- ============ KALKULYATORLAR ============ -->
+      <section class="vg-panel" id="panel-calc">
+        <div class="ai-calcs">
+          <div class="card vg-card ai-calc" id="calcPenya">
+            <h2>Penya (faiz) kalkulyatoru</h2>
+            <div class="vg-muted ai-sub">Gecikdirilmiş hər gün üçün 0,1%, ən çox 1 il (Vergi Məcəlləsi, 59-cu maddə)</div>
+            <div class="vg-field"><label for="pAmount">Ödənilməmiş vergi (AZN)</label><input id="pAmount" type="number" min="0" step="0.01" value="1000"></div>
+            <div class="ai-two">
+              <div class="vg-field"><label for="pDue">Son tarix</label><input id="pDue" type="date"></div>
+              <div class="vg-field"><label for="pPay">Ödəniş tarixi</label><input id="pPay" type="date"></div>
+            </div>
+            <div class="ai-result" id="pResult"></div>
+          </div>
+
+          <div class="card vg-card ai-calc" id="calcSalary">
+            <h2>Əmək haqqından vergilər</h2>
+            <div class="vg-muted ai-sub">2026 · qeyri-neft-qaz özəl sektoru · əsas iş yeri</div>
+            <div class="ai-two">
+              <div class="vg-field"><label for="sGross">Hesablanmış əmək haqqı (AZN)</label><input id="sGross" type="number" min="0" step="0.01" value="1500"></div>
+              <div class="vg-field"><label for="sCount">Əməkdaş sayı</label><input id="sCount" type="number" min="1" step="1" value="1"></div>
+            </div>
+            <div class="ai-result" id="sResult"></div>
+          </div>
+
+          <div class="card vg-card ai-calc" id="calcVat">
+            <h2>ƏDV kalkulyatoru</h2>
+            <div class="vg-muted ai-sub">Dərəcə 18% (Vergi Məcəlləsi, 173-cü maddə)</div>
+            <div class="vg-field"><label for="vAmount">Məbləğ (AZN)</label><input id="vAmount" type="number" min="0" step="0.01" value="1180"></div>
+            <div class="vg-seg" id="vMode">
+              <button type="button" data-m="extract" class="active">ƏDV-ni ayır (daxildir)</button>
+              <button type="button" data-m="add">ƏDV-ni əlavə et</button>
+            </div>
+            <div class="ai-result" id="vResult"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SƏNƏDLƏR VƏ YENİLİKLƏR ============ -->
+      <section class="vg-panel" id="panel-docs">
+        <div class="vg-grid">
+          <div class="card vg-card">
+            <div class="vg-card-head"><h2>Sənəd analizi</h2></div>
+            <label class="ai-drop" id="dropZone">
+              <input type="file" id="docFile" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt">
+              <span class="ai-drop-icon" id="iconFile"></span>
+              <b>Vergi orqanından gələn bildirişi, aktı və ya məktubu yükləyin</b>
+              <span class="vg-muted">PDF, şəkil və ya Word · faylı bura atın və ya klikləyin</span>
+            </label>
+            <div class="ai-drop-or"><span>və ya</span></div>
+            <button class="vg-btn-outline ai-sample-btn" type="button" id="sampleDoc">Nümunə bildirişlə sınayın</button>
+            <div id="docResult"></div>
+          </div>
+
+          <div class="card vg-card">
+            <div class="vg-card-head"><h2>Qanunvericilik yenilikləri</h2></div>
+            <div id="newsList"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="vg-demo-note">Ssenarili demo — cavablar əvvəlcədən hazırlanmış qaydalar və şirkətin demo məlumatları əsasında yaradılır</div>
+    </main>
+  </div>
+</div>
+
+<script src="js/config.js?v=1791400400"></script>
+<script src="js/mock-api.js?v=1791400400"></script>
+<script src="js/common.js?v=1791400400"></script>
+<script src="js/tax-data.js?v=1"></script>
+<script src="js/ai-vergi.js?v=1"></script>
+</body>
+</html>

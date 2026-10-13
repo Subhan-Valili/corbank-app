@@ -12,10 +12,16 @@ import org.springframework.web.bind.annotation.*;
 public class BulkPaymentController {
 
     private final BulkControllerFeignClient bulkControllerFeignClient;
+    private final PayerOwnershipGuard payerGuard;
 
     @PostMapping
     public ResponseEntity<CreateBulkPaymentResponse> createBulkPayments(
             @RequestBody CreateBulkPaymentRequest request) {
+        if (request.getPayments() == null || request.getPayments().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        request.getPayments().forEach(p ->
+                payerGuard.requireOwned(p.getPayer() != null ? p.getPayer().getAccountNumber() : null));
         return ResponseEntity.ok(bulkControllerFeignClient.createBulkPayments(request));
     }
 

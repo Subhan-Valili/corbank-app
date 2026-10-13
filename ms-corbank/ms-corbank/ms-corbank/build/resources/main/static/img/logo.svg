@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<defs>
+<linearGradient id="d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a74ff"/><stop offset="1" stop-color="#0d3bbd"/></linearGradient>
+<linearGradient id="l" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#3aa3ff"/><stop offset="1" stop-color="#8ad6ff"/></linearGradient>
+<clipPath id="dark"><polygon points="2,0 64,0 64,62"/></clipPath>
+<clipPath id="light"><polygon points="0,4 60,64 0,64"/></clipPath>
+</defs>
+<g clip-path="url(#dark)"><rect x="12" y="12" width="40" height="40" rx="8" transform="rotate(45 32 32)" fill="url(#d)"/></g>
+<g clip-path="url(#light)"><rect x="12" y="12" width="40" height="40" rx="8" transform="rotate(45 32 32)" fill="url(#l)"/></g>
+</svg>

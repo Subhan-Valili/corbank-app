@@ -12,7 +12,9 @@ public record Operation(
         BigDecimal amount,           // always positive; direction says which way the money moved
         String currency,
         OperationDirection direction,
-        OperationStatus status
+        OperationStatus status,
+        String accountId,            // hansı hesaba aiddir (Account.id) — UI "Hesaba keç" və IBAN üçün; bilinmirsə null
+        Bank bank                    // hansı bankdan gəlib; bilinmirsə null
 ) {
 
     /** Case-insensitive match on counterparty or description; blank search matches everything. */

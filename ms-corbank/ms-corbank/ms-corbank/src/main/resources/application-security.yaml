@@ -4,3 +4,8 @@ app:
       secret-key: "mySecretKeyMySecretKeyMySecretKeyMySecretKeyMySecretKeyMySecretKey"
       expiration-time: 600000 # 5 dəqiqə (milisaniyə ilə: 1000 * 60 * 5)
       refresh-expiration: 604800 # 7 gün saniyə ilə (Refresh Token üçün)
+    pin:
+      # PIN ms-pasha-ya sorğu üçün lazımdır, ona görə şifrələnmiş (geri açıla bilən) saxlanılır.
+      # PRODUCTION-da mütləq env ilə uzun təsadüfi dəyərlər verin.
+      encryption-key: ${PIN_ENCRYPTION_KEY:dev-only-change-me-pin-encryption-key-0123456789}
+      hash-key: ${PIN_HASH_KEY:dev-only-change-me-pin-hash-key-0123456789}

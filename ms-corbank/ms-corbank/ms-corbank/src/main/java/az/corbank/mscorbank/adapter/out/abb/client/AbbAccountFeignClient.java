@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -20,11 +21,13 @@ public interface AbbAccountFeignClient {
 
     /** GET /internal/abb/accounts — bütün hesabların siyahısı (ABB spec §4.21). */
     @GetMapping("/internal/abb/accounts")
-    List<AbbAccountResponseDto> findAllAccounts();
+    List<AbbAccountResponseDto> findAllAccounts(@RequestHeader("X-Customer-Pin") String pin);
 
 
+    /** ms-abb hesabın bu PIN-ə məxsus olduğunu yoxlayır (yoxsa 404 ACCOUNT_NOT_FOUND). */
     @GetMapping("/internal/abb/accounts/{accountNumber}/statement")
     AbbStatementResponseDto getStatement(
+            @RequestHeader("X-Customer-Pin") String pin,
             @PathVariable("accountNumber") String accountNumber,
             @RequestParam("fromDate") String fromDate,
             @RequestParam("toDate") String toDate,
@@ -36,7 +39,7 @@ public interface AbbAccountFeignClient {
      * ABB-yə heç bir sorğu getmir. Dashboard-un "Son əməliyyatlar" bölməsi üçün ucuz yol.
      */
     @GetMapping("/internal/abb/accounts/history/recent")
-    List<AbbOperationLineDto> getRecentHistory(@RequestParam("limit") int limit);
+    List<AbbOperationLineDto> getRecentHistory(@RequestHeader("X-Customer-Pin") String pin, @RequestParam("limit") int limit);
 
     /**
      * POST /internal/abb/payments — ms-abb-bank ya ABB-nin özünə göndərir (real rejim), ya da

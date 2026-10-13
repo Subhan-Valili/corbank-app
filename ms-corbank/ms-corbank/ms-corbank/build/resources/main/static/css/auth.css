@@ -1,0 +1,169 @@
+/* =====================================================================
+   Giriş / qeydiyyat səhifələri (login.html, register.html).
+   style.css-dən SONRA yüklənir; onun dəyişənlərindən (--accent, --border, --text...) istifadə edir.
+   Bütün siniflər "au-" ilə başlayır.
+   ===================================================================== */
+
+.au-body { min-height: 100vh; background: var(--bg); }
+
+.au {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(340px, 5fr) 7fr;
+}
+
+/* ---------- Sol panel: loqonun mavi rəngləri ---------- */
+.au-side {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 36px 44px;
+  color: #fff;
+  background: linear-gradient(155deg, #2a74ff 0%, #1f4fd8 52%, #0d3bbd 100%);
+}
+/* loqodakı iki üçbucaq/romb forması — yalnız fon motivi */
+.au-side::before {
+  content: "";
+  position: absolute;
+  width: 520px; height: 520px;
+  right: -190px; bottom: -190px;
+  border-radius: 90px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, rgba(138, 214, 255, .28), rgba(58, 163, 255, .06));
+  pointer-events: none;
+}
+.au-brand { position: relative; display: flex; align-items: center; gap: 12px; color: #fff; }
+.au-brand img { width: 46px; height: 46px; display: block; }
+.au-brand b { display: block; font-size: 23px; line-height: 1.1; font-weight: 700; }
+.au-brand small { display: block; margin-top: 2px; font-size: 14px; opacity: .8; }
+
+.au-pitch { position: relative; max-width: 420px; }
+.au-pitch h2 { margin: 0 0 14px; font-size: 32px; line-height: 1.2; font-weight: 700; letter-spacing: -.01em; }
+.au-pitch p { margin: 0 0 26px; font-size: 15px; line-height: 1.6; opacity: .88; }
+.au-banks { display: flex; flex-wrap: wrap; gap: 10px; }
+.au-bank {
+  display: inline-flex; align-items: center; gap: 9px;
+  height: 42px; padding: 0 16px 0 10px;
+  background: #fff; color: var(--text);
+  border-radius: 12px; font-size: 14px; font-weight: 700;
+}
+.au-bank img { width: 24px; height: 24px; display: block; }
+.au-side-foot { position: relative; font-size: 13px; opacity: .75; }
+
+/* ---------- Sağ tərəf: forma kartı ---------- */
+.au-main { display: flex; align-items: center; justify-content: center; padding: 32px 24px; }
+.au-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 34px 36px 30px;
+}
+.au-card h1 { margin: 0 0 6px; font-size: 28px; line-height: 1.15; font-weight: 700; }
+.au-lead { margin: 0 0 24px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+.au-form { display: flex; flex-direction: column; gap: 16px; }
+.au-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.au-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.au-field label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.au-input-wrap { position: relative; }
+.au-field input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fbfcfe;
+  color: var(--text);
+  font: inherit;
+  font-size: 14.5px;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.au-field input::placeholder { color: #a5afc4; }
+.au-field input:hover { border-color: #cdd7ea; }
+.au-field input:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+.au-field.invalid input { border-color: var(--red); background: #fff; }
+.au-field.invalid input:focus { box-shadow: 0 0 0 3px var(--red-bg); }
+.au-input-wrap input { padding-right: 46px; }
+.au-eye {
+  position: absolute; top: 0; right: 0;
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; color: var(--muted); border-radius: 10px;
+}
+.au-eye:hover { color: var(--text); }
+.au-eye:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.au-hint { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.au-error { font-size: 12.5px; color: var(--red); min-height: 0; }
+.au-error:empty { display: none; }
+
+.au-alert {
+  display: none;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: var(--red-bg);
+  color: #a42b2b;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.au-alert.show { display: block; }
+.au-alert.info { background: var(--accent-light); color: var(--accent); }
+
+.au-submit {
+  height: 48px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background-color .15s ease;
+}
+.au-submit:hover { background: #2552c9; }
+.au-submit:focus-visible, .au-link-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.au-submit:disabled { opacity: .65; cursor: default; }
+
+.au-switch { margin: 22px 0 0; text-align: center; color: var(--muted); font-size: 14px; }
+.au-switch a { color: var(--accent); font-weight: 600; }
+.au-switch a:hover { text-decoration: underline; }
+.au-guest { margin: 12px 0 0; text-align: center; font-size: 13px; }
+.au-guest a { color: var(--muted); }
+.au-guest a:hover { color: var(--accent); }
+
+/* ---------- OTP addımı ---------- */
+.au-otp {
+  height: 56px;
+  text-align: center;
+  font-size: 26px !important;
+  font-weight: 700;
+  letter-spacing: .5em;
+  padding-left: calc(14px + .5em) !important;
+}
+.au-otp-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13.5px; color: var(--muted); }
+.au-link-btn { border: none; background: transparent; padding: 0; color: var(--accent); font-size: 13.5px; font-weight: 600; border-radius: 4px; }
+.au-link-btn:hover:not(:disabled) { text-decoration: underline; }
+.au-link-btn:disabled { color: var(--muted); font-weight: 500; cursor: default; }
+.au-sent-to { color: var(--text); font-weight: 600; word-break: break-all; }
+
+.au-step[hidden] { display: none; }
+
+@media (max-width: 900px) {
+  .au { grid-template-columns: 1fr; }
+  .au-side { padding: 20px 22px; gap: 0; flex-direction: row; align-items: center; }
+  .au-side::before, .au-pitch, .au-side-foot { display: none; }
+  .au-main { align-items: flex-start; padding: 22px 16px 32px; }
+  .au-card { padding: 26px 22px 24px; }
+}
+@media (max-width: 480px) {
+  .au-row { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-field input, .au-submit { transition: none; }
+}

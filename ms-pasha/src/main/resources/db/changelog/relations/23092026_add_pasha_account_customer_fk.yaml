@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 23092026_add_pasha_account_customer_fk
+      author: Subhan-Valili
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: pasha_accounts
+            baseColumnNames: customer_id
+            constraintName: fk_pasha_account_customer
+            referencedTableName: customers
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+        - createIndex:
+            indexName: idx_pasha_customer_id
+            tableName: pasha_accounts
+            columns:
+              - column: { name: customer_id }

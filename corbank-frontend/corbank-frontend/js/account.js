@@ -25,26 +25,37 @@ let allAccounts = [];         // used by the "own accounts transfer" modal
 // ---------------------------------------------------------------
 // Services grid — each icon opens its own 3-step wizard (Məlumatlar → Yoxlama → Nəticə)
 // ---------------------------------------------------------------
+// `for` — xidmət hansı hesablarda görünür:
+//   'all' — bütün valyutalarda; 'AZN' — yalnız manat hesabında (yerli ödəniş sistemləri, vergi, kommunal, əmək haqqı);
+//   'FX'  — yalnız xarici valyuta hesablarında (USD, EUR...). Manat hesabından ölkəxarici köçürmə edilmir.
 const SERVICES = [
-  { icon: Icons.swap, label: 'Öz hesablarım arasında köçürmə', onClick: () => openOwnTransferModal() },
-  { icon: Icons.send, label: 'Ölkədaxili köçürmə', onClick: () => openFieldWizard(domesticConfig()) },
-  { icon: Icons.globe, label: 'Ölkəxarici köçürmə', onClick: () => openFieldWizard(internationalConfig()) },
-  { icon: Icons.bolt, label: 'Ani ödəniş', onClick: () => openFieldWizard(instantConfig()) },
-  { icon: Icons.card, label: 'Kartdan-karta köçürmə', onClick: () => openFieldWizard(cardToCardConfig()) },
-  { icon: Icons.refresh, label: 'Valyuta mübadiləsi', onClick: () => openFxWizard() },
-  { icon: Icons.bank, label: 'Büdcə və vergi ödənişləri', onClick: () => openFieldWizard(budgetConfig()) },
-  { icon: Icons.bulb, label: 'Kommunal və digər xidmət ödənişləri', onClick: () => openFieldWizard(utilityConfig()) },
-  { icon: Icons.copy, label: 'Kütləvi ödənişlər', onClick: () => openBulkModal() },
-  { icon: Icons.clock, label: 'Daimi ödənişlər', onClick: () => switchTab('standing') },
-  { icon: Icons.bookmark, label: 'Şablonlar', onClick: () => switchTab('templates') },
+  { icon: Icons.swap, label: 'Öz hesablarım arasında köçürmə', for: 'all', onClick: () => openOwnTransferModal() },
+  { icon: Icons.send, label: 'Ölkədaxili köçürmə', for: 'AZN', onClick: () => openFieldWizard(domesticConfig()) },
+  { icon: Icons.globe, label: 'Ölkəxarici köçürmə', for: 'FX', onClick: () => openFieldWizard(internationalConfig()) },
+  { icon: Icons.bolt, label: 'Ani ödəniş', for: 'AZN', onClick: () => openFieldWizard(instantConfig()) },
+  { icon: Icons.card, label: 'Kartdan-karta köçürmə', for: 'AZN', onClick: () => openFieldWizard(cardToCardConfig()) },
+  { icon: Icons.refresh, label: 'Valyuta mübadiləsi', for: 'all', onClick: () => openFxWizard() },
+  { icon: Icons.bank, label: 'Büdcə və vergi ödənişləri', for: 'AZN', onClick: () => openFieldWizard(budgetConfig()) },
+  { icon: Icons.bulb, label: 'Kommunal və digər xidmət ödənişləri', for: 'AZN', onClick: () => openFieldWizard(utilityConfig()) },
+  { icon: Icons.copy, label: 'Kütləvi ödənişlər', for: 'AZN', onClick: () => openBulkModal() },
+  { icon: Icons.clock, label: 'Daimi ödənişlər', for: 'all', onClick: () => switchTab('standing') },
+  { icon: Icons.bookmark, label: 'Şablonlar', for: 'all', onClick: () => switchTab('templates') },
 ];
 
+function serviceAllowed(s, currency) {
+  if (!currency || s.for === 'all') return true;
+  return s.for === 'AZN' ? currency === 'AZN' : currency !== 'AZN';
+}
+
+// Hesab hələ yüklənməyibsə xidmətlər göstərilmir — sonra hesabın valyutasına uyğun siyahı çəkilir
 function renderServices() {
-  document.getElementById('servicesGrid').innerHTML = SERVICES.map((s, i) => `
+  const cur = account ? account.currency : null;
+  if (!cur) { document.getElementById('servicesGrid').innerHTML = ''; return; }
+  document.getElementById('servicesGrid').innerHTML = SERVICES.map((s, i) => serviceAllowed(s, cur) ? `
     <button class="service-item" data-idx="${i}">
       <div class="service-icon">${s.icon}</div>
       <span>${s.label}</span>
-    </button>`).join('');
+    </button>` : '').join('');
 
   document.querySelectorAll('.service-item').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -176,7 +187,7 @@ async function resolveAccount() {
 
   // Versiya möhürü: brauzerin köhnə (keşdəki) account.js işlətdiyini dərhal göstərmək üçün
   const stamp = document.getElementById('buildStamp') || document.querySelector('.main').appendChild(Object.assign(document.createElement('div'), { id: 'buildStamp' }));
-  stamp.style.cssText = 'margin:18px 0 6px;font-size:11px;color:#8a94ad;text-align:center';
+  stamp.style.cssText = 'display:none';
   stamp.textContent = `account.js build r7 · soruşulan id: "${requested}" · tapılan: ${found.currency} (${found.id})`;
   console.info('[account] URL:', location.href, '| soruşulan id:', requested, '| tapılan hesab:', found.id, found.currency);
   if (found.id !== accountId) {
@@ -221,6 +232,7 @@ async function load() {
     document.getElementById('sumBalance').textContent = maskOrShow(Fmt.money(account.balance, account.currency));
 
     renderAccountSwitch();
+    renderServices();   // xidmətlər hesabın valyutasına görə süzülür
 
     await loadOperations();
   } catch (e) {
@@ -365,7 +377,9 @@ function renderTemplates() {
     </div>`).join('');
   el.querySelectorAll('[data-use]').forEach(b => b.addEventListener('click', () => {
     const t = list[Number(b.dataset.use)];
-    openFieldWizard(domesticConfig(), { beneficiaryName: t.name, beneficiaryIban: t.iban, amount: t.amount });
+    // Manat hesabında şablon ölkədaxili köçürmə, xarici valyuta hesabında isə ölkəxarici köçürmə kimi açılır
+    const cfg = account && account.currency !== 'AZN' ? internationalConfig() : domesticConfig();
+    openFieldWizard(cfg, { beneficiaryName: t.name, beneficiaryIban: t.iban, amount: t.amount });
   }));
   el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
     list.splice(Number(b.dataset.del), 1);
@@ -717,9 +731,8 @@ function internationalConfig() {
       { id: 'beneficiaryBank', label: 'Benefisiarın bankı', type: 'text', optional: true },
       { id: 'swift', label: 'SWIFT / BIC', type: 'text', placeholder: 'CHASUS33' },
       { id: 'beneficiaryIban', label: 'Alıcının IBAN / hesab nömrəsi', type: 'text', placeholder: 'AZ..' },
-      { id: 'currency', label: 'Köçürmə valyutası', type: 'select', defaultValue: account.currency,
-        options: ['AZN', 'USD', 'EUR'].map(c => ({ value: c, label: c })) },
-      { id: 'amount', label: 'Məbləğ', type: 'number', placeholder: '0,00' },
+      // Valyuta qaydası: köçürmə yalnız mənbə hesabın öz valyutasında aparılır
+      { id: 'amount', label: `Məbləğ (${account.currency})`, type: 'number', placeholder: '0,00' },
       { id: 'commission', label: 'Komissiya seçimi', type: 'select', options: [
         { value: 'SHA — bölüşdürülmüş', label: 'SHA — bölüşdürülmüş' },
         { value: 'OUR — göndərən ödəyir', label: 'OUR — göndərən ödəyir' },
@@ -729,13 +742,13 @@ function internationalConfig() {
     ],
     buildPayload: v => ({
       fromAccountId: accountId, beneficiaryName: v.beneficiaryName, beneficiaryIban: v.beneficiaryIban,
-      amount: parseFloat(v.amount), currency: v.currency,
+      amount: parseFloat(v.amount), currency: account.currency,
       description: `${v.description || 'Ölkəxarici köçürmə'} · SWIFT ${v.swift} · ${v.commission}`
     }),
     reviewRows: v => [
       ['Benefisiar', v.beneficiaryName], ['Ölkə', v.country], ['Bank', v.beneficiaryBank || '—'],
-      ['SWIFT/BIC', v.swift], ['IBAN', v.beneficiaryIban], ['Valyuta', v.currency],
-      ['Məbləğ', Fmt.money(v.amount, v.currency)], ['Komissiya', v.commission], ['Təyinat', v.description || '—']
+      ['SWIFT/BIC', v.swift], ['IBAN', v.beneficiaryIban], ['Valyuta', account.currency],
+      ['Məbləğ', Fmt.money(v.amount, account.currency)], ['Komissiya', v.commission], ['Təyinat', v.description || '—']
     ]
   };
 }
@@ -855,9 +868,12 @@ function utilityConfig() {
 // Own-accounts transfer — 3-step wizard: Məlumatlar → Yoxlama → Nəticə
 // ---------------------------------------------------------------
 async function openOwnTransferModal() {
-  const others = allAccounts.filter(a => a.id !== accountId && sameBank(a, account));
+  // Valyuta qaydası: öz hesablar arası köçürmə yalnız eyni valyutalı hesaba (AZN→AZN, USD→USD...).
+  // Fərqli valyutaya keçid üçün "Valyuta mübadiləsi" istifadə olunur.
+  // Eyni valyutada olduqda başqa bankdakı öz hesabınıza da (məs. PAŞA AZN → ABB AZN) köçürmək olar.
+  const others = allAccounts.filter(a => a.id !== accountId && a.currency === account.currency);
   if (others.length === 0) {
-    showToast('Eyni bankda başqa hesabınız yoxdur', 'error');
+    showToast(`Başqa ${account.currency} hesabınız yoxdur. Fərqli valyuta üçün "Valyuta mübadiləsi"ndən istifadə edin`, 'error');
     return;
   }
   let rates = [];
@@ -893,7 +909,7 @@ async function openOwnTransferModal() {
           <div class="modal-field">
             <label>Hədəf hesabı</label>
             <select id="w1Target">
-              ${others.map(a => `<option value="${escHtml(a.id)}" ${a.id === state.targetId ? 'selected' : ''}>${a.currency}</option>`).join('')}
+              ${others.map(a => `<option value="${escHtml(a.id)}" ${a.id === state.targetId ? 'selected' : ''}>${escHtml(accountLabel(a))} · …${escHtml(String(a.iban).slice(-4))}</option>`).join('')}
             </select>
           </div>
           <div class="modal-field">

@@ -5,6 +5,7 @@ import az.corbank.mscorbank.domain.model.Bank;
 import az.corbank.mscorbank.domain.model.Operation;
 import az.corbank.mscorbank.application.port.out.BankGateway;
 import az.corbank.mscorbank.application.port.out.BankUnavailableException;
+import az.corbank.mscorbank.application.port.out.CurrentCustomerPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,10 @@ class BankGateways {
 
     private final Map<Bank, BankGateway> byBank = new EnumMap<>(Bank.class);
 
-    BankGateways(List<BankGateway> gateways) {
+    private final CurrentCustomerPort customer;
+
+    BankGateways(List<BankGateway> gateways, CurrentCustomerPort customer) {
+        this.customer = customer;
         gateways.forEach(gateway -> byBank.put(gateway.bank(), gateway));
     }
 
@@ -41,11 +45,15 @@ class BankGateways {
         return get(bank).orElseThrow(() -> new IllegalStateException("No gateway configured for bank " + bank));
     }
 
+    /** Yalnız CARİ istifadəçinin hesabları. PIN-i yoxdursa (guest / köhnə user) boş siyahı. */
     List<Account> findAllAccountsSafely() {
+        Optional<String> pin = customer.currentPin();
+        if (pin.isEmpty()) return List.of();
+
         List<Account> result = new ArrayList<>();
         for (BankGateway gateway : byBank.values()) {
             try {
-                result.addAll(gateway.findAllAccounts());
+                result.addAll(gateway.findAllAccounts(pin.get()));
             } catch (BankUnavailableException e) {
                 log.warn("{} hesabları vermədi: {}", gateway.bank(), e.getMessage());
             }
@@ -53,20 +61,22 @@ class BankGateways {
         return result;
     }
 
-    Optional<Account> findAccountSafely(Bank bank, String accountId) {
-        Optional<BankGateway> gateway = get(bank);
-        if (gateway.isEmpty()) return Optional.empty();
-        try {
-            return gateway.get().findAccount(accountId);
-        } catch (BankUnavailableException e) {
-            log.debug("{} bankında hesab tapılmadı ({}): {}", bank, accountId, e.getMessage());
-            return Optional.empty();
-        }
+    /**
+     * Hesabı yalnız cari istifadəçinin öz hesabları arasında axtarır (id və ya IBAN ilə).
+     * Başqasının hesabı = tapılmadı. Bütün hesab/əməliyyat/ödəniş əməliyyatları bundan keçməlidir.
+     */
+    Optional<Account> findOwnedAccount(String accountId) {
+        if (accountId == null || accountId.isBlank()) return Optional.empty();
+        return findAllAccountsSafely().stream()
+                .filter(a -> accountId.equalsIgnoreCase(a.id()) || accountId.equalsIgnoreCase(a.iban()))
+                .findFirst();
     }
 
     List<Operation> findRecentOperationsSafely(BankGateway gateway, int limit) {
+        Optional<String> pin = customer.currentPin();
+        if (pin.isEmpty()) return List.of();
         try {
-            return gateway.findRecentOperations(limit);
+            return gateway.findRecentOperations(pin.get(), limit);
         } catch (BankUnavailableException e) {
             log.warn("{} son əməliyyatları vermədi: {}", gateway.bank(), e.getMessage());
             return List.of();

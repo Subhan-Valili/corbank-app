@@ -1,6 +1,7 @@
 package az.corbank.mscorbank.application.service;
 
-import az.corbank.mscorbank.domain.model.Bank;
+import az.corbank.mscorbank.application.exception.AccountNotFoundException;
+import az.corbank.mscorbank.domain.model.Account;
 import az.corbank.mscorbank.domain.model.Operation;
 import az.corbank.mscorbank.domain.model.OperationFilter;
 import az.corbank.mscorbank.domain.model.OperationsReport;
@@ -36,23 +37,19 @@ class OperationService implements ListOperationsUseCase {
     }
 
     /**
-     * An ABB account is served by ABB only (PASHA could answer with another account's operations).
-     * Anything else is tried at PASHA first, then ABB. If every source fails the result is an empty
-     * list, never an exception: the UI must show an empty table, not a 500.
+     * Hesab əvvəlcə cari istifadəçinin öz hesabları arasında tapılır (başqasının hesabı -> 404),
+     * sonra əməliyyatlar məhz həmin hesabın bankından alınır. Bank cavab verməsə nəticə boş siyahıdır,
+     * exception yox: UI 500 yox, boş cədvəl göstərməlidir.
      */
     private List<Operation> fetchRaw(String accountId, LocalDate from, LocalDate to) {
-        boolean abbAccount = banks.findAccountSafely(Bank.ABB, accountId).isPresent();
-        List<Bank> order = abbAccount ? List.of(Bank.ABB) : List.of(Bank.PASHA, Bank.ABB);
-
-        for (Bank bank : order) {
-            Optional<BankGateway> gateway = banks.get(bank);
-            if (gateway.isEmpty()) continue;
-            try {
-                return gateway.get().findOperations(accountId, from, to);
-            } catch (BankUnavailableException e) {
-                log.debug("{} bu hesab üçün əməliyyat vermədi ({}): {}", bank, accountId, e.getMessage());
-            }
+        Account account = banks.findOwnedAccount(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(accountId));
+        BankGateway gateway = banks.require(account.bank());
+        try {
+            return gateway.findOperations(account.id(), from, to);
+        } catch (BankUnavailableException e) {
+            log.debug("{} bu hesab üçün əməliyyat vermədi ({}): {}", account.bank(), accountId, e.getMessage());
+            return List.of();
         }
-        return List.of();
     }
 }

@@ -8,6 +8,7 @@ import az.ingress.mspashabank.service.PashaBankAccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class PashaBankAccountServiceImpl implements PashaBankAccountService {
     private final PashaAccountMapper pashaAccountMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<PashaAccountResponseDto> getAccounts(String customerNo) {
         log.info("ActionLog.getAccounts.start - customerNo: {}", customerNo);
 
@@ -31,6 +33,31 @@ public class PashaBankAccountServiceImpl implements PashaBankAccountService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<PashaAccountResponseDto> getAccountsByPin(String pin) {
+        log.info("ActionLog.getAccountsByPin.start - pin: {}", maskPin(pin));
+
+        List<PashaAccountEntity> entities =
+                pashaBankAccountRepository.findAccountsByCustomerPin(pin);
+
+        log.info("ActionLog.getAccountsByPin.end - pin: {}, count: {}", maskPin(pin), entities.size());
+        return pashaAccountMapper.toDto(entities);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PashaAccountResponseDto> getAccountsByTin(String tin) {
+        log.info("ActionLog.getAccountsByTin.start - tin: {}", tin);
+
+        List<PashaAccountEntity> entities =
+                pashaBankAccountRepository.findAccountsByCustomerTin(tin);
+
+        log.info("ActionLog.getAccountsByTin.end - tin: {}, count: {}", tin, entities.size());
+        return pashaAccountMapper.toDto(entities);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public PashaAccountResponseDto getAccountByAccountId(String accountId) {
         log.info("ActionLog.getAccountByAccountId.start - accountId: {}", accountId);
 
@@ -45,6 +72,7 @@ public class PashaBankAccountServiceImpl implements PashaBankAccountService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PashaAccountResponseDto getAccountByIban(String iban) {
         log.info("ActionLog.getAccountByIban.start - iban: {}", iban);
 
@@ -56,5 +84,12 @@ public class PashaBankAccountServiceImpl implements PashaBankAccountService {
 
         log.info("ActionLog.getAccountByIban.end - iban: {}", iban);
         return pashaAccountMapper.toDto(account);
+    }
+
+    private static String maskPin(String pin) {
+        if (pin == null || pin.length() < 3) {
+            return "***";
+        }
+        return "****" + pin.substring(pin.length() - 3);
     }
 }

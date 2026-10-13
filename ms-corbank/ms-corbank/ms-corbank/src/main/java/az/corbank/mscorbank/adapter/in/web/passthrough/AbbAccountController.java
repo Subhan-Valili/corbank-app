@@ -18,17 +18,18 @@ public class AbbAccountController {
     private final AbbAccountFeignClient abbAccountFeignClient;
 
     @GetMapping
-    public ResponseEntity<List<AbbAccountResponseDto>> findAllAccounts() {
-        return ResponseEntity.ok(abbAccountFeignClient.findAllAccounts());
+    public ResponseEntity<List<AbbAccountResponseDto>> findAllAccounts(@RequestHeader("X-Pin") String pin) {
+        return ResponseEntity.ok(abbAccountFeignClient.findAllAccounts(pin));
     }
 
     @GetMapping("/{accountNumber}/statement")
     public ResponseEntity<AbbStatementResponseDto> getStatement(
+            @RequestHeader("X-Pin") String pin,
             @PathVariable("accountNumber") String accountNumber,
             @RequestParam("fromDate") String fromDate,
             @RequestParam("toDate") String toDate,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "pageSize", defaultValue = "20") int pageSize) {
-        return ResponseEntity.ok(abbAccountFeignClient.getStatement(accountNumber, fromDate, toDate, page, pageSize));
+        return ResponseEntity.ok(abbAccountFeignClient.getStatement(pin, accountNumber, fromDate, toDate, page, pageSize));
     }
 }

@@ -21,6 +21,18 @@ public class PashaAccountController {
         return ResponseEntity.ok(pashaAccountFeignClient.findAllAccountsByCustomerNo(customerNo));
     }
 
+    @GetMapping("/by-pin")
+    public ResponseEntity<List<PashaAccountResponseDto>> findAllAccountsByPin(
+            @RequestHeader("X-Pin") String pin) {
+        return ResponseEntity.ok(pashaAccountFeignClient.findAllAccountsByPin(pin));
+    }
+
+    @GetMapping("/by-tin")
+    public ResponseEntity<List<PashaAccountResponseDto>> findAllAccountsByTin(
+            @RequestParam("tin") String tin) {
+        return ResponseEntity.ok(pashaAccountFeignClient.findAllAccountsByTin(tin));
+    }
+
     @GetMapping("/{accountId}")
     public ResponseEntity<PashaAccountResponseDto> findAccountByAccountId(
             @PathVariable("accountId") String accountId) {

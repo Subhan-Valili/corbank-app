@@ -5,6 +5,9 @@ databaseChangeLog:
       context: dev
       changes:
         - sqlFile:
+            path: db/changelog/data/insert-data-customer.sql
+            relativeToChangelogFile: false
+        - sqlFile:
             path: db/changelog/data/insert-data-account.sql
             relativeToChangelogFile: false
         - sqlFile:

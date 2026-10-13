@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 23092026_create_customers_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: customers
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: customer_no, type: VARCHAR(255), constraints: { nullable: false, unique: true } }
+              - column: { name: customer_type, type: VARCHAR(20), constraints: { nullable: false } }
+              - column: { name: pin, type: VARCHAR(7), constraints: { unique: true } }
+              - column: { name: name, type: VARCHAR(255) }
+              - column: { name: surname, type: VARCHAR(255) }
+              - column: { name: tin, type: VARCHAR(10), constraints: { unique: true } }
+              - column: { name: company_name, type: VARCHAR(255) }
+              - column: { name: mobile_number, type: VARCHAR(20), constraints: { nullable: false } }
+
+        - createIndex:
+            indexName: idx_customer_no
+            tableName: customers
+            columns:
+              - column: { name: customer_no }
+
+        - createIndex:
+            indexName: idx_customer_pin
+            tableName: customers
+            columns:
+              - column: { name: pin }
+
+        - createIndex:
+            indexName: idx_customer_tin
+            tableName: customers
+            columns:
+              - column: { name: tin }
