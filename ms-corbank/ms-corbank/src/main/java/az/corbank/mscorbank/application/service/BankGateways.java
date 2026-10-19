@@ -47,7 +47,7 @@ class BankGateways {
 
     /** Yalnız CARİ istifadəçinin hesabları (qoşduğu banklardan). Heç nə qoşmayıbsa boş siyahı. */
     List<Account> findAllAccountsSafely() {
-        // Hər bank öz etibarnaməsini özü seçir: ABB PIN ilə, Paşa istifadəçinin saxlanmış API Key-i ilə.
+        // Hər bank öz etibarnaməsini özü seçir: ABB və Paşa saxlanmış API Key ilə.
         // Etibarnamə yoxdursa adapter boş siyahı qaytarır.
         String pin = customer.currentPin().orElse(null);
 
@@ -75,9 +75,13 @@ class BankGateways {
 
     List<Operation> findRecentOperationsSafely(BankGateway gateway, int limit) {
         Optional<String> pin = customer.currentPin();
-        if (pin.isEmpty()) return List.of();
+        if (gateway.supportsApiKey()) {
+            if (customer.currentApiKey(gateway.bank()).isEmpty()) return List.of();
+        } else if (pin.isEmpty()) {
+            return List.of();
+        }
         try {
-            return gateway.findRecentOperations(pin.get(), limit);
+            return gateway.findRecentOperations(pin.orElse(null), limit);
         } catch (BankUnavailableException e) {
             log.warn("{} son əməliyyatları vermədi: {}", gateway.bank(), e.getMessage());
             return List.of();

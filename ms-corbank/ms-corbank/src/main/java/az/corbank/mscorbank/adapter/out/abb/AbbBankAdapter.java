@@ -9,6 +9,8 @@ import az.corbank.mscorbank.domain.model.OperationStatus;
 import az.corbank.mscorbank.domain.model.PaymentCommand;
 import az.corbank.mscorbank.domain.model.PaymentResult;
 import az.corbank.mscorbank.application.port.out.BankGateway;
+import az.corbank.mscorbank.application.exception.InvalidApiKeyException;
+import feign.FeignException;
 import az.corbank.mscorbank.application.port.out.BankUnavailableException;
 import az.corbank.mscorbank.application.port.out.CurrentCustomerPort;
 import az.corbank.mscorbank.adapter.out.abb.client.AbbAccountFeignClient;
@@ -50,27 +52,42 @@ class AbbBankAdapter implements BankGateway {
 
     @Override
     public List<Account> findAllAccounts(String pin) {
-        if (pin == null || pin.isBlank()) return List.of();
+        Optional<String> key = customer.currentApiKey(Bank.ABB);
+        if (key.isEmpty()) return List.of();
         try {
-            return client.findAllAccounts(pin).stream().map(this::toAccount).toList();
-        } catch (Exception e) {
+            return client.findAccountsByApiKey(key.get()).stream().map(this::toAccount).toList();
+        } catch (FeignException e) {
+            throw new BankUnavailableException(Bank.ABB, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean supportsApiKey() {
+        return true;
+    }
+
+    @Override
+    public List<Account> findAccountsByApiKey(String apiKey) {
+        try {
+            List<AbbAccountResponseDto> accounts = client.findAccountsByApiKey(apiKey);
+            return accounts == null ? List.of() : accounts.stream().map(this::toAccount).toList();
+        } catch (FeignException e) {
+            if (e.status() == 400 || e.status() == 401 || e.status() == 403 || e.status() == 404) {
+                throw new InvalidApiKeyException("ABB Bank bu Open API Key-i qəbul etmədi");
+            }
             throw new BankUnavailableException(Bank.ABB, e.getMessage(), e);
         }
     }
 
     @Override
     public List<Operation> findOperations(String accountId, LocalDate fromDate, LocalDate toDate) {
-        // ms-abb hər sorğuda PIN tələb edir (X-Customer-Pin) — hesabın bu müştəriyə aid olduğunu yoxlamaq üçün.
-        String pin = customer.currentPin().orElse(null);
-        if (pin == null) {
-            log.warn("ABB çıxarışı üçün cari istifadəçinin PIN-i yoxdur (accountId={})", accountId);
-            return List.of();
-        }
+        String key = customer.currentApiKey(Bank.ABB).orElse(null);
+        if (key == null) return List.of();
         try {
             LocalDate to = toDate != null ? toDate : LocalDate.now();
             LocalDate from = fromDate != null ? fromDate : to.minusDays(90);
-            AbbStatementResponseDto statement = client.getStatement(
-                    pin, accountId, from.format(QUERY_DATE), to.format(QUERY_DATE), 1, 200);
+            AbbStatementResponseDto statement = client.getStatementByApiKey(
+                    key, accountId, from.format(QUERY_DATE), to.format(QUERY_DATE), 1, 200);
             // ABB (and its mock) do not always honour the date range — filter here so both banks
             // behave the same for the same UI filter.
             return statement.transactions().stream()
@@ -84,14 +101,16 @@ class AbbBankAdapter implements BankGateway {
 
     @Override
     public List<Operation> findRecentOperations(String pin, int limit) {
+        String key = customer.currentApiKey(Bank.ABB).orElse(null);
+        if (key == null) return List.of();
         try {
             // ms-abb sətirlərində hesab nömrəsi var, ms-corbank-da isə Account.id (IBAN) — xəritələyirik
             java.util.Map<String, String> idByNumber = new java.util.HashMap<>();
-            for (AbbAccountResponseDto a : client.findAllAccounts(pin)) {
+            for (AbbAccountResponseDto a : client.findAccountsByApiKey(key)) {
                 String id = a.iban() != null ? a.iban() : a.accountNumber();
                 if (a.accountNumber() != null) idByNumber.put(a.accountNumber(), id);
             }
-            return client.getRecentHistory(pin, limit).stream()
+            return client.getRecentHistoryByApiKey(key, limit).stream()
                     .map(op -> toOperation(op, idByNumber.getOrDefault(op.accountNumber(), op.accountNumber())))
                     .toList();
         } catch (Exception e) {
@@ -111,8 +130,10 @@ class AbbBankAdapter implements BankGateway {
                 .creditAmount(command.creditAmount())
                 .creditCurrency(command.creditCurrency())
                 .build();
+        String key = customer.currentApiKey(Bank.ABB).orElse(null);
+        if (key == null) return PaymentResult.rejected("ABB Bank qoşulmayıb");
         try {
-            AbbPaymentResponseDto response = client.submitPayment(request);
+            AbbPaymentResponseDto response = client.submitPayment(key, request);
             return "COMPLETED".equalsIgnoreCase(response.status())
                     ? PaymentResult.completed(response.message(), null)
                     : PaymentResult.rejected(response.message());

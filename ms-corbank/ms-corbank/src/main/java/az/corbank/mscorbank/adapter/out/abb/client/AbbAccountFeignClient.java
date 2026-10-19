@@ -23,6 +23,9 @@ public interface AbbAccountFeignClient {
     @GetMapping("/internal/abb/accounts")
     List<AbbAccountResponseDto> findAllAccounts(@RequestHeader("X-Customer-Pin") String pin);
 
+    @GetMapping("/internal/abb/accounts/byKey")
+    List<AbbAccountResponseDto> findAccountsByApiKey(@RequestHeader("X-API-Key") String apiKey);
+
 
     /** ms-abb hesabın bu PIN-ə məxsus olduğunu yoxlayır (yoxsa 404 ACCOUNT_NOT_FOUND). */
     @GetMapping("/internal/abb/accounts/{accountNumber}/statement")
@@ -33,6 +36,19 @@ public interface AbbAccountFeignClient {
             @RequestParam("toDate") String toDate,
             @RequestParam("page") int page,
             @RequestParam("pageSize") int pageSize);
+
+    @GetMapping("/internal/abb/accounts/{accountNumber}/statement")
+    AbbStatementResponseDto getStatementByApiKey(
+            @RequestHeader("X-API-Key") String apiKey,
+            @PathVariable("accountNumber") String accountNumber,
+            @RequestParam("fromDate") String fromDate,
+            @RequestParam("toDate") String toDate,
+            @RequestParam("page") int page,
+            @RequestParam("pageSize") int pageSize);
+
+    @GetMapping("/internal/abb/accounts/history/recent")
+    List<AbbOperationLineDto> getRecentHistoryByApiKey(
+            @RequestHeader("X-API-Key") String apiKey, @RequestParam("limit") int limit);
 
     /**
      * GET /internal/abb/accounts/history/recent — ms-abb-bank-ın öz DB-sindən oxuyur,
@@ -47,5 +63,6 @@ public interface AbbAccountFeignClient {
      * balans/tarixçə dəyişikliyi ms-abb-bank-ın öz Postgres-ində baş verir.
      */
     @PostMapping("/internal/abb/payments")
-    AbbPaymentResponseDto submitPayment(@RequestBody AbbPaymentRequestDto request);
+    AbbPaymentResponseDto submitPayment(@RequestHeader("X-API-Key") String apiKey,
+                                         @RequestBody AbbPaymentRequestDto request);
 }

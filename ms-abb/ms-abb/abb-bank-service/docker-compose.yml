@@ -35,6 +35,9 @@ services:
       ABB_API_BASE_URL: ${ABB_API_BASE_URL:-https://api-test-c2b.abb-bank.az}
       ABB_API_USERNAME: ${ABB_API_USERNAME:-}
       ABB_API_PASSWORD: ${ABB_API_PASSWORD:-}
+      ABB_API_MOCK_ENABLED: ${ABB_API_MOCK_ENABLED:-true}
+      ABB_SEED_DEMO_KEYS: ${ABB_SEED_DEMO_KEYS:-true}
+      ABB_API_KEY_ADMIN_TOKEN: ${ABB_API_KEY_ADMIN_TOKEN:-}
     ports:
       - "8083:8083"
 

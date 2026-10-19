@@ -4,6 +4,7 @@ import az.corbank.abb.application.port.in.SubmitPaymentUseCase;
 import az.corbank.abb.application.port.out.AbbBankGateway;
 import az.corbank.abb.domain.exception.AbbGatewayException;
 import az.corbank.abb.domain.model.CorporateAccount;
+import az.corbank.abb.domain.model.CustomerIdentity;
 import az.corbank.abb.domain.model.PaymentInstruction;
 import az.corbank.abb.domain.model.PaymentOutcome;
 import org.slf4j.Logger;
@@ -30,12 +31,12 @@ public class PaymentApplicationService implements SubmitPaymentUseCase {
     }
 
     @Override
-    public PaymentOutcome submit(PaymentInstruction instruction) {
+    public PaymentOutcome submit(CustomerIdentity identity, PaymentInstruction instruction) {
         if (instruction.amount() == null || instruction.amount().signum() <= 0) {
             return PaymentOutcome.rejected("Məbləğ düzgün deyil.");
         }
 
-        List<CorporateAccount> accounts = gateway.listAccounts();
+        List<CorporateAccount> accounts = gateway.listAccounts(identity);
         Optional<CorporateAccount> from = accounts.stream()
                 .filter(a -> matches(a, instruction.fromAccountNumber()))
                 .findFirst();

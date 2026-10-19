@@ -41,6 +41,10 @@ abb:
     # ABB_API_MOCK_ENABLED=false) the moment real access + credentials are ready — nothing
     # else needs to change, AbbHttpGateway takes over automatically.
     mock-enabled: ${ABB_API_MOCK_ENABLED:true}
+    # Demo keys are seeded only in mock mode; never use demo keys against a real bank.
+    seed-demo-keys: ${ABB_SEED_DEMO_KEYS:true}
+    # If unset, key provisioning/revocation API is disabled (403).
+    key-admin-token: ${ABB_API_KEY_ADMIN_TOKEN:}
 
 logging:
   level:

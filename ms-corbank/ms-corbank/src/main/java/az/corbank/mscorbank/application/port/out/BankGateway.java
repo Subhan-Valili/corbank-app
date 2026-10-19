@@ -33,7 +33,7 @@ public interface BankGateway {
         return List.of();
     }
 
-    /** Bu bank istifadəçinin daxil etdiyi Open API Key ilə işləyirmi (Paşa: bəli, ABB: hələ yox). */
+    /** Bu bank istifadəçinin daxil etdiyi Open API Key ilə işləyirmi (Paşa və ABB: bəli). */
     default boolean supportsApiKey() {
         return false;
     }

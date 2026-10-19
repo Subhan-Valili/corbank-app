@@ -6,6 +6,7 @@ import az.corbank.abb.domain.exception.InvalidCustomerIdentityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -40,6 +41,13 @@ class GlobalExceptionHandler {
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("Invalid request");
         return ResponseEntity.badRequest().body(errorBody("VALIDATION_ERROR", detail));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    ResponseEntity<Map<String, Object>> handleHttpStatus(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(errorBody(
+                ex.getStatusCode().value() == 401 ? "INVALID_API_KEY" : "REQUEST_REJECTED",
+                ex.getReason() != null ? ex.getReason() : "Request rejected"));
     }
 
     @ExceptionHandler(Exception.class)

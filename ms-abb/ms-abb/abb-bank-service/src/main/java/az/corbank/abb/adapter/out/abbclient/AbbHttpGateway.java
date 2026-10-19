@@ -67,15 +67,13 @@ class AbbHttpGateway implements AbbBankGateway {
     }
 
     /**
-     * TODO: ABB's corporate-account-info (§4.21) is scoped to OUR API credentials, not to a
-     * PIN/mobile number, so this currently returns every account of that CIF regardless of
-     * identity. Before turning mock-enabled off, confirm with ABB how to filter per
-     * customer (or filter here against our own customers table) — otherwise any customer
-     * would see all accounts.
+     * ABB's live §4.21 response is scoped to the server's banking credentials, not to
+     * a verified PIN/mobile. Fail closed rather than disclose another customer's accounts.
+     * Enable this only after implementing server-verified customer scoping with ABB.
      */
     @Override
     public List<CorporateAccount> listAccounts(CustomerIdentity identity) {
-        return listAccounts();
+        throw new AbbGatewayException("Customer-scoped ABB live API is not configured");
     }
 
     @Override
