@@ -15,4 +15,6 @@ public interface PashaBankAccountService {
     PashaAccountResponseDto getAccountByAccountId(String accountId);
 
     PashaAccountResponseDto getAccountByIban(String iban);
+
+    List<PashaAccountResponseDto> getAccountsByApiKey(String apiKey, String accountType);
 }

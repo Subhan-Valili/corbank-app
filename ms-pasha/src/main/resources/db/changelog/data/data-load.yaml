@@ -8,6 +8,9 @@ databaseChangeLog:
             path: db/changelog/data/insert-data-customer.sql
             relativeToChangelogFile: false
         - sqlFile:
+            path: db/changelog/data/insert-data-apiKeys.sql
+            relativeToChangelogFile: false
+        - sqlFile:
             path: db/changelog/data/insert-data-account.sql
             relativeToChangelogFile: false
         - sqlFile:

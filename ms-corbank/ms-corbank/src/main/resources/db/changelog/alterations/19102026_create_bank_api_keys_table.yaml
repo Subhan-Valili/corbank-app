@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 19102026_create_bank_api_keys_table
+      author: corbank
+      changes:
+        - createTable:
+            tableName: bank_api_keys
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: user_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_bank_api_keys_user, references: users(id), deleteCascade: true } }
+              - column: { name: bank, type: VARCHAR(30), constraints: { nullable: false } }
+              - column: { name: api_key_encrypted, type: VARCHAR(1024), constraints: { nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+        - addUniqueConstraint:
+            tableName: bank_api_keys
+            columnNames: user_id, bank
+            constraintName: uq_bank_api_keys_user_bank

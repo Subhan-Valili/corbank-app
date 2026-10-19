@@ -1,4 +1,3 @@
--- ms-pasha: müştərilər (Subhan, Rasul, Fərid, İmran). Hesablar üçün insert-data-account.sql-i bundan SONRA işlət.
 INSERT INTO customers (
     created_at, updated_at, customer_no, customer_type,
     pin, name, surname, tin, company_name, mobile_number

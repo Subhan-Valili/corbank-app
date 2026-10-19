@@ -3,11 +3,11 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/ms-corbank/ms-corbank" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/ms-corbank" />
         <option name="gradleJvm" value="#JAVA_HOME" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/ms-corbank/ms-corbank" />
+            <option value="$PROJECT_DIR$/ms-corbank" />
           </set>
         </option>
       </GradleProjectSettings>

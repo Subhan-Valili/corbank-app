@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 19102026_add_api_key_customer_fk
+      author: Subhan-Valili
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: api_keys
+            baseColumnNames: customer_id
+            constraintName: fk_api_key_customer
+            referencedTableName: customers
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+        - createIndex:
+            indexName: idx_api_key_customer_id
+            tableName: api_keys
+            columns:
+              - column: { name: customer_id }

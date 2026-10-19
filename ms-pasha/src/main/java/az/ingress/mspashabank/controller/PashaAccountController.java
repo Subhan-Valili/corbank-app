@@ -37,4 +37,11 @@ public class PashaAccountController {
     public PashaAccountResponseDto findAccountByIban(@PathVariable String iban) {
         return pashaBankAccountService.getAccountByIban(iban);
     }
+
+    @GetMapping("/byKey")
+    public List<PashaAccountResponseDto> getAccounts(
+            @RequestHeader(value = "X-API-Key", required = false) String apiKey,
+            @RequestParam(required = false) String accountType) {
+        return pashaBankAccountService.getAccountsByApiKey(apiKey, accountType);
+    }
 }

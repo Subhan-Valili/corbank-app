@@ -39,4 +39,12 @@ public interface PashaBankAccountRepository extends JpaRepository<PashaAccountEn
             """)
     List<PashaAccountEntity> findAccountsByAccountIdInOrIbanIn(@Param("identifiers") Collection<String> identifiers);
 
+    @Query("""
+            select a from PashaAccountEntity a
+            join fetch a.customer c
+            where c.id = :customerId
+              and (:accountType is null or a.accountType = :accountType)
+            """)
+    List<PashaAccountEntity> findByCustomer(@Param("customerId") Long customerId,
+                                            @Param("accountType") String accountType);
 }

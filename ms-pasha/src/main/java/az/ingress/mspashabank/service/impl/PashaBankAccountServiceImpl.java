@@ -1,6 +1,7 @@
 package az.ingress.mspashabank.service.impl;
 
 import az.ingress.mspashabank.dto.account.PashaAccountResponseDto;
+import az.ingress.mspashabank.entity.CustomerEntity;
 import az.ingress.mspashabank.entity.PashaAccountEntity;
 import az.ingress.mspashabank.mapper.PashaAccountMapper;
 import az.ingress.mspashabank.repository.PashaBankAccountRepository;
@@ -19,6 +20,7 @@ public class PashaBankAccountServiceImpl implements PashaBankAccountService {
 
     private final PashaBankAccountRepository pashaBankAccountRepository;
     private final PashaAccountMapper pashaAccountMapper;
+    private final ApiKeyServiceImpl  apiKeyService;
 
     @Override
     @Transactional(readOnly = true)
@@ -84,6 +86,21 @@ public class PashaBankAccountServiceImpl implements PashaBankAccountService {
 
         log.info("ActionLog.getAccountByIban.end - iban: {}", iban);
         return pashaAccountMapper.toDto(account);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PashaAccountResponseDto> getAccountsByApiKey(String apiKey, String accountType) {
+        log.info("ActionLog.getAccountsByApiKey.start - accountType: {}", accountType);
+
+        CustomerEntity customer = apiKeyService.authenticate(apiKey);
+
+        List<PashaAccountEntity> entities =
+                pashaBankAccountRepository.findByCustomer(customer.getId(), accountType);
+
+        log.info("ActionLog.getAccountsByApiKey.end - customerNo: {}, count: {}",
+                customer.getCustomerNo(), entities.size());
+        return pashaAccountMapper.toDto(entities);
     }
 
     private static String maskPin(String pin) {

@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 19102026_create_api_keys_table
+      author: Subhan-Valili
+      changes:
+        - createTable:
+            tableName: api_keys
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+              - column: { name: key_hash, type: VARCHAR(64), constraints: { nullable: false, unique: true } }
+              - column: { name: key_prefix, type: VARCHAR(12) }
+              - column: { name: active, type: BOOLEAN, defaultValueBoolean: true, constraints: { nullable: false } }
+              - column: { name: expires_at, type: TIMESTAMP }
+              - column: { name: customer_id, type: BIGINT, constraints: { nullable: false } }
+
+        - createIndex:
+            indexName: idx_api_key_hash
+            tableName: api_keys
+            columns:
+              - column: { name: key_hash }
